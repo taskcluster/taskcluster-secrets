@@ -1,0 +1,6 @@
+node_modules/
+config/development.js
+*.swp
+*.swo
+taskcluster-github.conf.json
+npm-debug.log
