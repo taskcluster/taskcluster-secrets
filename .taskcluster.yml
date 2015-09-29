@@ -14,7 +14,6 @@ tasks:
           - pull_request.opened
           - pull_request.synchronize
           - pull_request.reopened
-          - push
     payload:
       maxRunTime: 3600
       image: "quay.io/mrrrgn/ubuntu-ci:0.0.1"
