@@ -1,5 +1,3 @@
-import slugid from 'slugid';
-
 const TEST_TABLE_NAME = 'AzureTableName';
 
 module.exports = {
