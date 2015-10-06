@@ -15,6 +15,18 @@ var helper = module.exports = {};
 var cfg = common.loadConfig('test');
 const baseUrl = cfg.get('server:publicUrl') + '/v1';
 
+// Skip tests if no credentials are configured
+if (!cfg.get('taskcluster:credentials:accessToken') ||
+    !cfg.get('taskcluster:credentials:clientId')) {
+  console.log("Skip tests due to missing taskcluster credentials!");
+  process.exit(1);
+}
+
+if (!cfg.get('azure:accountName')) {
+  console.log("Skip tests due to missing azure accountName!");
+  process.exit(1);
+}
+
 // All client shoulds expire within a minute
 const ClientExpiration = new Date((new Date()).getTime() + (60 * 1000));
 
