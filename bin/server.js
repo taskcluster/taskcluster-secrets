@@ -36,9 +36,9 @@ let launch = async function(profile) {
 
    let entity = base.Entity.configure({
     version:          1,
+    signEntities:     cfg.get('azure:signEntities'),
     partitionKey:     base.Entity.keys.StringKey('namespace'),
     rowKey:           base.Entity.keys.StringKey('key'),
-    authBaseUrl:      'https://auth.taskcluster.net/v1',
     properties: {
       namespace:      base.Entity.types.String,
       key:            base.Entity.types.String,
@@ -49,7 +49,9 @@ let launch = async function(profile) {
     account:          cfg.get('azure:accountName'),
     credentials:      cfg.get('taskcluster:credentials'),
     table:            cfg.get('azure:tableName'),
-    cryptoKey:        cfg.get('azure:cryptoKey')
+    cryptoKey:        cfg.get('azure:cryptoKey'),
+    signingKey:       cfg.get('azure:signingKey'),
+
   });
 
 

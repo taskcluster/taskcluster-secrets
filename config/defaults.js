@@ -14,6 +14,10 @@ module.exports = {
     }
   },
 
+  azure: {
+    signEntities:                 false
+  },
+
   // Server configuration
   server: {
     // Public URL from which the server can be accessed (used for persona)
