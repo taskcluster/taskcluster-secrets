@@ -3,8 +3,8 @@ suite("TaskCluster-Secrets", () => {
   var assert = require('assert');
   var slugid = require('slugid');
 
-  let testValueExpires = {value: "bar", expires: "2066-10-06T07:25:54.957Z"};
-  let testValueExpired = {value: "bar", expires: "2011-04-01T00:00:00.000Z"};
+  let testValueExpires = {value: {data: "bar"}, expires: "2066-10-06T07:25:54.957Z"};
+  let testValueExpired = {value: {data: "bar"}, expires: "2011-04-01T00:00:00.000Z"};
 
   const FOO_KEY = slugid.v4();
   const BAR_KEY = slugid.v4();
@@ -57,6 +57,14 @@ suite("TaskCluster-Secrets", () => {
       testName:   "Captain (read only), read deleted foo.",
       clientName: "captain-read",
       apiCall:    "secretRead",
+      namespace:  "secrets:captain",
+      key:        FOO_KEY,
+      res:        404
+    },
+    {
+      testName:   "Captain (write only), delete already deleted foo.",
+      clientName: "captain-write",
+      apiCall:    "secretRemove",
       namespace:  "secrets:captain",
       key:        FOO_KEY,
       res:        404
