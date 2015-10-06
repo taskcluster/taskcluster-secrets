@@ -15,28 +15,30 @@ var helper = module.exports = {};
 var cfg = common.loadConfig('test');
 const baseUrl = cfg.get('server:publicUrl') + '/v1';
 
+// All client shoulds expire within a minute
+const ClientExpiration = new Date((new Date()).getTime() + (60 * 1000));
+
 // Some default clients for the mockAuthServer
 var defaultClients = [
   {
   clientId:     'test-server',  // Hardcoded into config/test.js
-  accessToken:  'none',
   scopes:       ['auth:credentials'],
-  expires:      new Date(3000, 0, 0, 0, 0, 0, 0)
+  expiry:       ClientExpiration,
+  credentials:  cfg.get('taskcluster:credentials')
   }, {
   clientId:     'captain-write', // can write captain's secrets
-  accessToken:  'none',
   scopes:       ['secrets:write', 'secrets:remove', 'secrets:captain:*'],
-  expires:      new Date(3000, 0, 0, 0, 0, 0, 0)
+  expiry:      ClientExpiration,
+  credentials:  cfg.get('taskcluster:credentials')
   }, {
   clientId:     'captain-read', // can read captain's secrets
   accessToken:  'none',
   scopes:       ['secrets:read', 'secrets:captain:*'],
-  expires:      new Date(3000, 0, 0, 0, 0, 0, 0)
+  expiry:      ClientExpiration,
+  credentials:  cfg.get('taskcluster:credentials')
   }
 ];
 
-// Hold reference to authServer
-var authServer = null;
 var webServer = null;
 
 var SecretsClient = taskcluster.createClient(
@@ -48,21 +50,13 @@ helper.clients = {};
 for (let client of defaultClients) {
   helper.clients[client.clientId] = new SecretsClient({
     baseUrl:          baseUrl,
-    credentials: {
-      clientId:       client.clientId,
-      accessToken:    client.accessToken
-    },
+    credentials: taskcluster.createTemporaryCredentials(client),
     authorizedScopes: client.scopes
   });
 };
 
 // Setup before tests
 mocha.before(async () => {
-  // Create mock authentication server
-  authServer = await base.testing.createMockAuthServer({
-  port:     cfg.get('taskcluster:authPort'),
-  clients:  defaultClients,
-  });
   webServer = await bin.server('test')
 });
 
@@ -70,5 +64,4 @@ mocha.before(async () => {
 mocha.after(async () => {
   // Kill webServer
   await webServer.terminate();
-  await authServer.terminate();
 });

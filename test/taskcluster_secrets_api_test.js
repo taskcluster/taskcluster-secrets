@@ -1,10 +1,13 @@
 suite("TaskCluster-Secrets", () => {
   var helper = require('./helper');
   var assert = require('assert');
+  var slugid = require('slugid');
 
-  let testValueNoExpires = {value: "bar"};
-  let testValueExpires = {value: "bar", expires: "2066-04-01 00:00:00"};
-  let testValueExpired = {value: "bar", expires: "2011-04-01 00:00:00"};
+  let testValueExpires = {value: "bar", expires: "2066-10-06T07:25:54.957Z"};
+  let testValueExpired = {value: "bar", expires: "2011-04-01T00:00:00.000Z"};
+
+  const FOO_KEY = slugid.v4();
+  const BAR_KEY = slugid.v4();
 
   let testData = [
     // The "Captain" clients
@@ -12,76 +15,77 @@ suite("TaskCluster-Secrets", () => {
       testName:   "Captain, write allowed key",
       clientName: "captain-write",
       apiCall:    "secretWrite",
-      key:        "secrets:captain:foo",
-      args:      testValueNoExpires,
+      namespace:  "secrets:captain",
+      key:        FOO_KEY,
+      args:       testValueExpires,
       res:        {}
     },
     {
       testName:   "Captain, write disallowed key",
       clientName: "captain-write",
       apiCall:    "secretWrite",
-      key:        "secrets:tennille:foo",
-      args:      testValueNoExpires,
+      namespace:  "secrets:tennille",
+      key:        FOO_KEY,
+      args:       testValueExpires,
       res:        401 // It's not authorized!
     },
     {
       testName:   "Captain (write only), fail to read.",
       clientName: "captain-write",
       apiCall:    "secretRead",
-      key:        "secrets:captain:foo",
+      namespace:  "secrets:captain",
+      key:        FOO_KEY,
       res:        401 // it's not authorized!
     },
     {
       testName:   "Captain (read only), read foo.",
       clientName: "captain-read",
       apiCall:    "secretRead",
-      key:        "secrets:captain:foo",
-      res:        testValueNoExpires
+      namespace:  "secrets:captain",
+      key:        FOO_KEY,
+      res:        testValueExpires
     },
     {
       testName:   "Captain (write only), delete foo.",
       clientName: "captain-write",
       apiCall:    "secretRemove",
-      key:        "secrets:captain:foo",
+      namespace:  "secrets:captain",
+      key:        FOO_KEY,
       res:        {}
     },
     {
       testName:   "Captain (read only), read deleted foo.",
       clientName: "captain-read",
       apiCall:    "secretRead",
-      key:        "secrets:captain:foo",
+      namespace:  "secrets:captain",
+      key:        FOO_KEY,
       res:        404
     },
     {
-      testName:   "Captain (write only), write foo that expires.",
+      testName:   "Captain (write only), write bar that is expired.",
       clientName: "captain-write",
       apiCall:    "secretWrite",
-      key:        "secrets:captain:foo",
-      args:        testValueExpires,
-      res:          {}
-    },
-    {
-      testName:   "Captain (read only), read foo that expires.",
-      clientName: "captain-read",
-      apiCall:    "secretRead",
-      key:        "secrets:captain:foo",
-      res:        testValueExpires
-    },
-    {
-      testName:   "Captain (write only), write foo that is expired.",
-      clientName: "captain-write",
-      apiCall:    "secretWrite",
-      key:        "secrets:captain:foo",
+      namespace:  "secrets:captain",
+      key:        BAR_KEY,
       args:       testValueExpired,
       res:        {}
     },
     {
-      testName:   "Captain (read only), read foo that is expired.",
+      testName:   "Captain (read only), read bar that is expired.",
       clientName: "captain-read",
       apiCall:    "secretRead",
-      key:        "secrets:captain:foo",
+      namespace:  "secrets:captain",
+      key:        BAR_KEY,
       res:        410
-    }
+    },
+    {
+      testName:   "Captain (write only), delete bar.",
+      clientName: "captain-write",
+      apiCall:    "secretRemove",
+      namespace:  "secrets:captain",
+      key:        BAR_KEY,
+      res:        {}
+    },
   ]
 
   for (let options of testData) {
@@ -90,14 +94,16 @@ suite("TaskCluster-Secrets", () => {
       let res = undefined;
       try {
         if (options.args) {
-          res = await client[options.apiCall](options.key, options.args);
+          res = await client[options.apiCall](options.namespace, options.key, options.args);
         } else {
-          res = await client[options.apiCall](options.key);
+          res = await client[options.apiCall](options.namespace, options.key);
         }
       } catch (e) {
         res = e.statusCode;
       }
-      assert.deepEqual(res, options.res);
+      for (let key in options.res) {
+        assert.deepEqual(res[key], options.res[key]);
+      }
     });
   }
 });
