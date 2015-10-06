@@ -1,3 +1,7 @@
+import slugid from 'slugid';
+
+const TEST_TABLE_NAME = 'AzureTableName';
+
 module.exports = {
 
   taskclusterSecrets: {
@@ -5,18 +9,13 @@ module.exports = {
     statsComponent:               'test-queue',
   },
 
-  storageObject: {
-    type:                         'Local',
-    args:                         undefined
+  azure: {
+    tableName:   TEST_TABLE_NAME,
+    cryptoKey:   'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
   },
 
   taskcluster: {
-    authBaseUrl:                  'http://localhost:60414/v1',
-    authPort:                     60414,
-    credentials: {
-      clientId:                   "test-server",
-      accessToken:                "none"
-    }
+    authBaseUrl:                  'https://auth.taskcluster.net/v1',
   },
 
   server: {

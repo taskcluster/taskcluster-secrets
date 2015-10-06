@@ -7,8 +7,6 @@ import common from '../lib/common';
 import Promise from 'promise';
 import _ from 'lodash';
 
-import * as storage from '../lib/storage';
-
 let debug = Debug('secrets:server');
 
 /** Launch server */
@@ -36,15 +34,30 @@ let launch = async function(profile) {
 
   let validator = await common.buildValidator(cfg);
 
-  let storageObjectType = cfg.get('storageObject:type');
-  debug(`Creating storage object: ${storageObjectType}`);
-  let storageObject = new storage[storageObjectType](cfg.get('storageObject:args'));
+   let entity = base.Entity.configure({
+    version:          1,
+    partitionKey:     base.Entity.keys.StringKey('namespace'),
+    rowKey:           base.Entity.keys.StringKey('key'),
+    authBaseUrl:      'https://auth.taskcluster.net/v1',
+    properties: {
+      namespace:      base.Entity.types.String,
+      key:            base.Entity.types.String,
+      value:          base.Entity.types.EncryptedJSON,
+      expires:        base.Entity.types.Date
+    }
+  }).setup({
+    account:          cfg.get('azure:accountName'),
+    credentials:      cfg.get('taskcluster:credentials'),
+    table:            cfg.get('azure:tableName'),
+    cryptoKey:        cfg.get('azure:cryptoKey')
+  });
+
 
   // Create API router and publish reference if needed
   debug("Creating API router");
 
   let router = await api.setup({
-    context:          {cfg, storageObject},
+    context:          {cfg, entity},
     authBaseUrl:      cfg.get('taskcluster:authBaseUrl'),
     credentials:      cfg.get('taskcluster:credentials'),
     validator:        validator,
