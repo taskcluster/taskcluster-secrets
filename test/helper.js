@@ -5,7 +5,7 @@ import taskcluster from 'taskcluster-client';
 import mocha from 'mocha';
 import common from '../lib/common';
 var bin = {
-  server:         require('../bin/server'),
+  server: require('../bin/server'),
 };
 
 // Create and export helper object
@@ -21,11 +21,6 @@ const ClientExpiration = new Date((new Date()).getTime() + (60 * 1000));
 // Some default clients for the mockAuthServer
 var defaultClients = [
   {
-  clientId:     'test-server',  // Hardcoded into config/test.js
-  scopes:       ['auth:credentials'],
-  expiry:       ClientExpiration,
-  credentials:  cfg.get('taskcluster:credentials')
-  }, {
   clientId:     'captain-write', // can write captain's secrets
   scopes:       ['secrets:write', 'secrets:remove', 'secrets:captain:*'],
   expiry:      ClientExpiration,
