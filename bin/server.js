@@ -36,12 +36,10 @@ let launch = async function(profile) {
 
    let entity = base.Entity.configure({
     version:          1,
-    signEntities:     cfg.get('azure:signEntities'),
-    partitionKey:     base.Entity.keys.StringKey('namespace'),
-    rowKey:           base.Entity.keys.StringKey('key'),
+    partitionKey:     base.Entity.keys.ConstantKey('secrets'),
+    rowKey:           base.Entity.keys.StringKey('name'),
     properties: {
-      namespace:      base.Entity.types.String,
-      key:            base.Entity.types.String,
+      name:           base.Entity.types.String,
       value:          base.Entity.types.EncryptedJSON,
       expires:        base.Entity.types.Date
     }
@@ -49,9 +47,7 @@ let launch = async function(profile) {
     account:          cfg.get('azure:accountName'),
     credentials:      cfg.get('taskcluster:credentials'),
     table:            cfg.get('azure:tableName'),
-    cryptoKey:        cfg.get('azure:cryptoKey'),
-    signingKey:       cfg.get('azure:signingKey'),
-
+    cryptoKey:        cfg.get('azure:cryptoKey')
   });
 
 

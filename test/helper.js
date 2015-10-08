@@ -34,13 +34,17 @@ const ClientExpiration = new Date((new Date()).getTime() + (60 * 1000));
 var defaultClients = [
   {
   clientId:     'captain-write', // can write captain's secrets
-  scopes:       ['secrets:write', 'secrets:remove', 'secrets:captain:*'],
+  scopes:       [
+    'secrets:set:captain:*',
+    'secrets:update:captain:*',
+    'secrets:remove:captain:*'
+  ],
   expiry:      ClientExpiration,
   credentials:  cfg.get('taskcluster:credentials')
   }, {
   clientId:     'captain-read', // can read captain's secrets
   accessToken:  'none',
-  scopes:       ['secrets:read', 'secrets:captain:*'],
+  scopes:       ['secrets:get:captain:*'],
   expiry:      ClientExpiration,
   credentials:  cfg.get('taskcluster:credentials')
   }

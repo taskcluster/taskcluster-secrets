@@ -15,101 +15,89 @@ suite("TaskCluster-Secrets", () => {
     {
       testName:   "Captain, write allowed key",
       clientName: "captain-write",
-      apiCall:    "secretWrite",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
+      apiCall:    "set",
+      name:        "captain:" + FOO_KEY,
       args:       testValueExpires,
       res:        {}
     },
     {
       testName:   "Captain, write disallowed key",
       clientName: "captain-write",
-      apiCall:    "secretWrite",
-      namespace:  "secrets:tennille",
-      key:        FOO_KEY,
+      apiCall:    "set",
+      name:       "tennille:" + FOO_KEY,
       args:       testValueExpires,
-      res:        401 // It's not authorized!
+      statusCode: 401 // It's not authorized!
     },
     {
       testName:   "Captain (write only), fail to read.",
       clientName: "captain-write",
-      apiCall:    "secretRead",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
-      res:        401 // it's not authorized!
+      apiCall:    "get",
+      name:        "captain:" + FOO_KEY,
+      statusCode: 401 // it's not authorized!
     },
     {
       testName:   "Captain (read only), read foo.",
       clientName: "captain-read",
-      apiCall:    "secretRead",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
+      apiCall:    "get",
+      name:       "captain:" + FOO_KEY,
       res:        testValueExpires
     },
     {
       testName:   "Captain, update allowed key",
       clientName: "captain-write",
-      apiCall:    "secretUpdate",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
+      apiCall:    "update",
+      name:        "captain:" + FOO_KEY,
       args:       testValueExpires2,
       res:        {}
     },
     {
       testName:   "Captain (read only), read updated foo.",
       clientName: "captain-read",
-      apiCall:    "secretRead",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
+      apiCall:    "get",
+      name:        "captain:" + FOO_KEY,
       res:        testValueExpires2
     },
     {
       testName:   "Captain (write only), delete foo.",
       clientName: "captain-write",
-      apiCall:    "secretRemove",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
+      apiCall:    "remove",
+      name:        "captain:" + FOO_KEY,
       res:        {}
     },
     {
       testName:   "Captain (read only), read deleted foo.",
       clientName: "captain-read",
-      apiCall:    "secretRead",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
-      res:        404
+      apiCall:    "get",
+      name:        "captain:" + FOO_KEY,
+      statusCode: 404
     },
     {
       testName:   "Captain (write only), delete already deleted foo.",
       clientName: "captain-write",
-      apiCall:    "secretRemove",
-      namespace:  "secrets:captain",
-      key:        FOO_KEY,
-      res:        404
+      apiCall:    "remove",
+      name:        "captain:" + FOO_KEY,
+      statusCode: 404
     },
     {
       testName:   "Captain (write only), write bar that is expired.",
       clientName: "captain-write",
-      apiCall:    "secretWrite",
-      namespace:  "secrets:captain",
-      key:        BAR_KEY,
+      apiCall:    "set",
+      name:        "captain:" + BAR_KEY,
       args:       testValueExpired,
       res:        {}
     },
     {
       testName:   "Captain (read only), read bar that is expired.",
       clientName: "captain-read",
-      apiCall:    "secretRead",
-      namespace:  "secrets:captain",
-      key:        BAR_KEY,
-      res:        410
+      apiCall:    "get",
+      name:        "captain:" + BAR_KEY,
+      statusCode: 410
     },
     {
       testName:   "Captain (write only), delete bar.",
       clientName: "captain-write",
-      apiCall:    "secretRemove",
-      namespace:  "secrets:captain",
-      key:        BAR_KEY,
+      apiCall:    "remove",
+      name:        "captain:" + BAR_KEY,
       res:        {}
     },
   ]
@@ -120,12 +108,16 @@ suite("TaskCluster-Secrets", () => {
       let res = undefined;
       try {
         if (options.args) {
-          res = await client[options.apiCall](options.namespace, options.key, options.args);
+          res = await client[options.apiCall](options.name, options.args);
         } else {
-          res = await client[options.apiCall](options.namespace, options.key);
+          res = await client[options.apiCall](options.name);
         }
       } catch (e) {
-        res = e.statusCode;
+        if (e.statusCode) {
+          assert.deepEqual(options.statusCode, e.statusCode);
+        } else {
+          throw e; // if there's no statusCode this isn't an API error
+        }
       }
       for (let key in options.res) {
         assert.deepEqual(res[key], options.res[key]);
