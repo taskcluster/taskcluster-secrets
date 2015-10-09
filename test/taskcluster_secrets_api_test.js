@@ -3,9 +3,9 @@ suite("TaskCluster-Secrets", () => {
   var assert = require('assert');
   var slugid = require('slugid');
 
-  let testValueExpires  = {value: {data: "bar"}, expires: "2066-10-06T07:25:54.957Z"};
-  let testValueExpires2 = {value: {data: "foo"}, expires: "2066-10-06T07:25:54.957Z"};
-  let testValueExpired  = {value: {data: "bar"}, expires: "2011-04-01T00:00:00.000Z"};
+  let testValueExpires  = {secret: {data: "bar"}, expires: "2066-10-06T07:25:54.957Z"};
+  let testValueExpires2 = {secret: {data: "foo"}, expires: "2066-10-06T07:25:54.957Z"};
+  let testValueExpired  = {secret: {data: "bar"}, expires: "2011-04-01T00:00:00.000Z"};
 
   const FOO_KEY = slugid.v4();
   const BAR_KEY = slugid.v4();

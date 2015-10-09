@@ -1,5 +1,3 @@
-const TEST_TABLE_NAME = 'AzureTableName';
-
 module.exports = {
 
   taskclusterSecrets: {
@@ -8,8 +6,9 @@ module.exports = {
   },
 
   azure: {
-    tableName:   TEST_TABLE_NAME,
-    cryptoKey:   'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
+    tableName:                    'AzureTableName',
+    cryptoKey:                    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk=',
+    signingKey:                   'REALULTIMATEPOWER.NET'
   },
 
   taskcluster: {
