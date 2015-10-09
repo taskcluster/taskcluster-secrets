@@ -28,7 +28,7 @@ if (!cfg.get('azure:accountName')) {
 }
 
 // All client shoulds expire within a minute
-const ClientExpiration = new Date((new Date()).getTime() + (60 * 1000));
+const ClientExpiration = new Date((new Date()).getTime() + (5 * 60 * 1000));
 
 // Some default clients for the mockAuthServer
 var defaultClients = [

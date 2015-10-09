@@ -4,6 +4,7 @@ import base from 'taskcluster-base';
 import api from '../lib/api';
 import path from 'path';
 import common from '../lib/common';
+import data from '../lib/data';
 import Promise from 'promise';
 import _ from 'lodash';
 
@@ -34,28 +35,11 @@ let launch = async function(profile) {
 
   let validator = await common.buildValidator(cfg);
 
-   let entity = base.Entity.configure({
-    version:          1,
-    partitionKey:     base.Entity.keys.ConstantKey('secrets'),
-    rowKey:           base.Entity.keys.StringKey('name'),
-    properties: {
-      name:           base.Entity.types.String,
-      value:          base.Entity.types.EncryptedJSON,
-      expires:        base.Entity.types.Date
-    }
-  }).setup({
-    account:          cfg.get('azure:accountName'),
-    credentials:      cfg.get('taskcluster:credentials'),
-    table:            cfg.get('azure:tableName'),
-    cryptoKey:        cfg.get('azure:cryptoKey')
-  });
-
-
   // Create API router and publish reference if needed
   debug("Creating API router");
 
   let router = await api.setup({
-    context:          {cfg, entity},
+    context:          {cfg},
     authBaseUrl:      cfg.get('taskcluster:authBaseUrl'),
     credentials:      cfg.get('taskcluster:credentials'),
     validator:        validator,
