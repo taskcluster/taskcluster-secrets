@@ -34,7 +34,13 @@ let launch = async function(profile) {
   });
 
   let validator = await common.buildValidator(cfg);
-  let entity = data.SecretEntity(cfg);
+  let entity = data.SecretEntity.setup({
+    account:          cfg.get('azure:accountName'),
+    credentials:      cfg.get('taskcluster:credentials'),
+    table:            cfg.get('azure:tableName'),
+    cryptoKey:        cfg.get('azure:cryptoKey'),
+    signingKey:       cfg.get('azure:signingKey')
+  });
 
   // Create API router and publish reference if needed
   debug("Creating API router");
