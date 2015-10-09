@@ -66,6 +66,21 @@ suite("TaskCluster-Secrets", () => {
       res:        testValueExpires2
     },
     {
+      testName:   "Captain, update allowed key again",
+      clientName: "captain-write",
+      apiCall:    "update",
+      name:        "captain:" + FOO_KEY,
+      args:       testValueExpires2,
+      res:        {}
+    },
+    {
+      testName:   "Captain (read only), read updated foo again",
+      clientName: "captain-read",
+      apiCall:    "get",
+      name:        "captain:" + FOO_KEY,
+      res:        testValueExpires2
+    },
+    {
       testName:   "Captain (write only), delete foo.",
       clientName: "captain-write",
       apiCall:    "remove",
