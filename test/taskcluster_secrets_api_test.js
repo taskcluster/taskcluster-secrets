@@ -3,18 +3,15 @@ suite("TaskCluster-Secrets", () => {
   var assert = require('assert');
   var slugid = require('slugid');
 
-  let testValueExpires         = {secret: {data: "bar"}, expires: "2066-10-06T07:25:54.957Z"};
-  let testValueExpires2        = {secret: {data: "foo"}, expires: "2066-10-06T07:25:54.957Z"};
-  let testValueExpired         = {secret: {data: "bar"}, expires: "2011-04-01T00:00:00.000Z"};
-  let testValueExpiresSigned   = {secret: {data: "bar"}, expires: "2066-10-06T07:25:54.957Z", signingKey: "Butter-n-Sghetti"};
-  let testValueExpiresSigned2  = {secret: {data: "foo"}, expires: "2066-10-06T07:25:54.957Z", signingKey: "Butter-n-Sghetti"};
+  let testValueExpires  = {value: {data: "bar"}, expires: "2066-10-06T07:25:54.957Z"};
+  let testValueExpires2 = {value: {data: "foo"}, expires: "2066-10-06T07:25:54.957Z"};
+  let testValueExpired  = {value: {data: "bar"}, expires: "2011-04-01T00:00:00.000Z"};
 
-  const FOO_KEY    = slugid.v4();
-  const BAR_KEY    = slugid.v4();
-  const SIGNED_KEY = slugid.v4();
+  const FOO_KEY = slugid.v4();
+  const BAR_KEY = slugid.v4();
 
   let testData = [
-    // UNSIGNED TESTS
+    // The "Captain" clients
     {
       testName:   "Captain, write allowed key",
       clientName: "captain-write",
@@ -103,55 +100,6 @@ suite("TaskCluster-Secrets", () => {
       name:        "captain:" + BAR_KEY,
       res:        {}
     },
-    // SIGNED TESTS
-    {
-      testName:   "(signed) Captain, write allowed key",
-      clientName: "captain-write",
-      apiCall:    "set",
-      name:        "captain:" + SIGNED_KEY,
-      args:       testValueExpiresSigned,
-      res:        {}
-    },
-    {
-      testName:   "(signed) Captain (read only), read foo.",
-      clientName: "captain-read",
-      apiCall:    "getSigned",
-      name:       "captain:" + SIGNED_KEY,
-      args:       {signingKey: testValueExpiresSigned.signingKey},
-      res:        testValueExpires // The signing key won't be in the result
-    },
-    {
-      testName:   "(signed) Captain, update allowed key",
-      clientName: "captain-write",
-      apiCall:    "update",
-      name:        "captain:" + SIGNED_KEY,
-      args:       testValueExpiresSigned2,
-      res:        {}
-    },
-    {
-      testName:   "(signed) Captain (read only), read updated foo.",
-      clientName: "captain-read",
-      apiCall:    "getSigned",
-      name:        "captain:" + SIGNED_KEY,
-      args:       {signingKey: testValueExpiresSigned.signingKey},
-      res:        testValueExpires2
-    },
-    {
-      testName:   "(signed) Captain (read only), read updated foo using a bad key.",
-      clientName: "captain-read",
-      apiCall:    "getSigned",
-      name:       "captain:" + SIGNED_KEY,
-      args:       {signingKey: "ISHOULDNOTWORK"},
-      statusCode: 422
-    },
-    {
-      testName:   "(signed) Captain (write only), delete foo.",
-      clientName: "captain-write",
-      apiCall:    "removeSigned",
-      args:       {signingKey: testValueExpiresSigned.signingKey},
-      name:       "captain:" + SIGNED_KEY,
-      res:        {}
-    }
   ]
 
   for (let options of testData) {
