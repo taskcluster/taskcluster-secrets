@@ -21,6 +21,14 @@ suite("TaskCluster-Secrets", () => {
       res:        {}
     },
     {
+      testName:   "Captain, write allowed key again",
+      clientName: "captain-write",
+      apiCall:    "set",
+      name:        "captain:" + FOO_KEY,
+      args:       testValueExpires,
+      res:        {}
+    },
+    {
       testName:   "Captain, write disallowed key",
       clientName: "captain-write",
       apiCall:    "set",
@@ -41,7 +49,7 @@ suite("TaskCluster-Secrets", () => {
       apiCall:    "set",
       args:       testValueExpires2,
       name:       "captain:" + FOO_KEY,
-      statusCode: 409 // it's not authorized!
+      statusCode: 409
     },
     {
       testName:   "Captain (read only), read foo.",
