@@ -67,6 +67,14 @@ suite("TaskCluster-Secrets", () => {
       res:        {}
     },
     {
+      testName:   "Captain, update a secret that doesn't exist",
+      clientName: "captain-write",
+      apiCall:    "update",
+      name:        "captain:" + FOO_KEY + "Je_n_existe_pas",
+      args:       testValueExpires2,
+      statusCode: 404
+    },
+    {
       testName:   "Captain (read only), read updated foo.",
       clientName: "captain-read",
       apiCall:    "get",
