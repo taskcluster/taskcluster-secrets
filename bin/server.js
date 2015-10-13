@@ -39,7 +39,10 @@ let launch = async function(profile) {
     credentials:      cfg.get('taskcluster:credentials'),
     table:            cfg.get('azure:tableName'),
     cryptoKey:        cfg.get('azure:cryptoKey'),
-    signingKey:       cfg.get('azure:signingKey')
+    signingKey:       cfg.get('azure:signingKey'),
+    drain:            statsDrain,
+    component:        cfg.get('taskclusterSecrets:statsComponent'),
+    process:          'server'
   });
 
   // Create API router and publish reference if needed
