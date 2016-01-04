@@ -20,7 +20,9 @@
   },
   "devDependencies": {
     "mocha":                "^2.2.1",
-    "assume":               "^1.2.4"
+    "assume":               "^1.2.4",
+    "nock":                 "^4.0.0",
+    "hawk":                 "2.3.0"
   },
   "engines": {
     "node":                 "0.12.x",

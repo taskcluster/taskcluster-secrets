@@ -4,6 +4,7 @@ import api from '../lib/api';
 import taskcluster from 'taskcluster-client';
 import mocha from 'mocha';
 import common from '../lib/common';
+import fakeauth from './fakeauth';
 var bin = {
   server: require('../bin/server'),
   expireSecrets: require('../bin/expire-secrets')
@@ -33,9 +34,6 @@ if (!cfg.get('azure:accountName')) {
   process.exit(1);
 }
 
-// All client shoulds expire within a minute
-const ClientExpiration = new Date((new Date()).getTime() + (60 * 1000));
-
 // Some clients for the tests, with differents scopes.  These are turned
 // into temporary credentials based on the main test credentials, so
 // the clientIds listed here are purely internal to the tests.
@@ -47,14 +45,10 @@ var testClients = [
       'secrets:update:captain:*',
       'secrets:remove:captain:*'
     ],
-    expiry:       ClientExpiration,
-    credentials:  cfg.get('taskcluster:credentials')
   }, {
     clientId:     'captain-read', // can read captain's secrets
     accessToken:  'none',
     scopes:       ['secrets:get:captain:*'],
-    expiry:       ClientExpiration,
-    credentials:  cfg.get('taskcluster:credentials')
   }, {
     clientId:     'captain-read-write',
     scopes:       [
@@ -63,41 +57,39 @@ var testClients = [
       'secrets:remove:captain:*',
       'secrets:get:captain:*'
     ],
-    expiry:       ClientExpiration,
-    credentials:  cfg.get('taskcluster:credentials')
   }, {
     clientId:     'captain-read-limited',
     scopes:       [
       'secrets:get:captain:limited/*'
     ],
-    expiry:       ClientExpiration,
-    credentials:  cfg.get('taskcluster:credentials')
   }
 ];
-
-var webServer = null;
 
 var SecretsClient = taskcluster.createClient(
   api.reference({baseUrl: baseUrl})
 );
 
-// Set up all of our clients
-helper.clients = {};
-for (let client of testClients) {
-  helper.clients[client.clientId] = new SecretsClient({
-    baseUrl:          baseUrl,
-    credentials: taskcluster.createTemporaryCredentials(client),
-    authorizedScopes: client.scopes
-  });
-};
+var webServer = null;
 
 // Setup before tests
 mocha.before(async () => {
+  // Set up all of our clients, each with a different clientId
+  helper.clients = {};
+  for (let client of testClients) {
+    helper.clients[client.clientId] = new SecretsClient({
+      baseUrl:          baseUrl,
+      credentials:      {clientId: client.clientId, accessToken: 'unused'},
+    });
+    fakeauth.setClientScopes(client.clientId, client.scopes);
+  }
+
+  // start up the secrets service so that we can test it live
   webServer = await bin.server('test')
 });
 
 // Cleanup after tests
 mocha.after(async () => {
-  // Kill webServer
+  fakeauth.reset()
   await webServer.terminate();
 });
+
