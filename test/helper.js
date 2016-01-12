@@ -4,7 +4,7 @@ import api from '../lib/api';
 import taskcluster from 'taskcluster-client';
 import mocha from 'mocha';
 import common from '../lib/common';
-import fakeauth from './fakeauth';
+import testing from 'taskcluster-lib-testing';
 var bin = {
   server: require('../bin/server'),
   expireSecrets: require('../bin/expire-secrets')
@@ -75,13 +75,15 @@ var webServer = null;
 mocha.before(async () => {
   // Set up all of our clients, each with a different clientId
   helper.clients = {};
+  var auth = {};
   for (let client of testClients) {
     helper.clients[client.clientId] = new SecretsClient({
       baseUrl:          baseUrl,
       credentials:      {clientId: client.clientId, accessToken: 'unused'},
     });
-    fakeauth.setClientScopes(client.clientId, client.scopes);
+    auth[client.clientId] = client.scopes;
   }
+  testing.fakeauth.start(auth);
 
   // start up the secrets service so that we can test it live
   webServer = await bin.server('test')
@@ -89,7 +91,7 @@ mocha.before(async () => {
 
 // Cleanup after tests
 mocha.after(async () => {
-  fakeauth.reset()
+  testing.fakeauth.stop()
   await webServer.terminate();
 });
 
