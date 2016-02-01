@@ -78,8 +78,12 @@ mocha.before(async () => {
   }
   testing.fakeauth.start(auth);
 
+  // create the Azure table
+  let entity = await load('entity', {profile: 'test', process: 'test'});
+  await entity.ensureTable();
+
   // start up the secrets service so that we can test it live
-  webServer = await load('server', {'profile': 'test', process: 'test'});
+  webServer = await load('server', {profile: 'test', process: 'test'});
 });
 
 // Cleanup after tests
