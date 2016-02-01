@@ -5,10 +5,7 @@ import taskcluster from 'taskcluster-client';
 import mocha from 'mocha';
 import common from '../lib/common';
 import testing from 'taskcluster-lib-testing';
-var bin = {
-  server: require('../bin/server'),
-  expireSecrets: require('../bin/expire-secrets')
-};
+import load from '../bin/main';
 
 // Create and export helper object
 var helper = module.exports = {};
@@ -82,7 +79,7 @@ mocha.before(async () => {
   testing.fakeauth.start(auth);
 
   // start up the secrets service so that we can test it live
-  webServer = await bin.server('test')
+  webServer = await load('server', {'profile': 'test', process: 'test'});
 });
 
 // Cleanup after tests
