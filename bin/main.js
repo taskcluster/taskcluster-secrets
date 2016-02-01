@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import Debug from 'debug';
-import base from 'taskcluster-base';
 import api from '../lib/api';
 import data from '../lib/data';
 import assert from 'assert';
@@ -11,6 +10,7 @@ import _ from 'lodash';
 import loader from 'taskcluster-lib-loader';
 import app from 'taskcluster-lib-app';
 import taskcluster from 'taskcluster-client';
+import stats from 'taskcluster-lib-stats';
 
 let debug = Debug('secrets:server');
 
@@ -29,13 +29,13 @@ var load = loader({
           cfg.get('influx:maxDelay'),
           cfg.get('influx:maxPendingPoints'));
         // Start monitoring the process
-        base.stats.startProcessUsageReporting({
+        stats.startProcessUsageReporting({
           component:  cfg.get('taskclusterSecrets:statsComponent'),
           drain, process,
         });
       } else {
         debug("Not loading Influx -- no connection string");
-        return new base.stats.NullDrain();
+        return new stats.NullDrain();
       }
     },
   },
