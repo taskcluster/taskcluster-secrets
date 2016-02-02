@@ -10,26 +10,9 @@ import load from '../bin/main';
 // Create and export helper object
 var helper = module.exports = {};
 
-// Allow tests to run expire-secrets
-helper.expireSecrets = () => {
-  return bin.expireSecrets('test');
-};
-
 // Load configuration
 var cfg = common.loadConfig('test');
 const baseUrl = cfg.get('server:publicUrl') + '/v1';
-
-// Skip tests if no credentials are configured
-if (!cfg.get('taskcluster:credentials:accessToken') ||
-    !cfg.get('taskcluster:credentials:clientId')) {
-  console.log("Skip tests due to missing taskcluster credentials!");
-  process.exit(1);
-}
-
-if (!cfg.get('azure:accountName')) {
-  console.log("Skip tests due to missing azure accountName!");
-  process.exit(1);
-}
 
 // Some clients for the tests, with differents scopes.  These are turned
 // into temporary credentials based on the main test credentials, so
