@@ -1,6 +1,6 @@
 defaults:
   taskclusterSecrets:
-    publishMetaData:              'false'
+    publishMetaData:              !env PUBLISH_METADATA
     statsComponent:               'secrets'
     # Time delay before expiring secrets, in readable format, see:
     # taskcluster.fromNow, notice this should be negative!
@@ -73,8 +73,6 @@ defaults:
 
 production:
   taskclusterSecrets:
-    # Should be overwritten by environment variable
-    publishMetaData:              'false'
     exchangePrefix:               'v1/'
 
   server:
