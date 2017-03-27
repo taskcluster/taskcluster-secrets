@@ -941,7 +941,7 @@ core-js@^2.4.0:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.4.1.tgz#4de911e667b0eae9124e34254b53aea6fc618d3e"
 
-core-util-is@~1.0.0:
+core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
 
@@ -1732,6 +1732,12 @@ home-or-tmp@^2.0.0:
   dependencies:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.1"
+
+hsts@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/hsts/-/hsts-1.0.0.tgz#98e1039ef7aba554057b6b0e32584c0b1143a414"
+  dependencies:
+    core-util-is "1.0.2"
 
 http-errors@~1.3.1:
   version "1.3.1"
@@ -3150,14 +3156,15 @@ taskcluster-lib-api@^3.1.0:
     type-is "^1.6.10"
     uuid "^2.0.1"
 
-taskcluster-lib-app@^0.8.10:
-  version "0.8.10"
-  resolved "https://registry.yarnpkg.com/taskcluster-lib-app/-/taskcluster-lib-app-0.8.10.tgz#5aa9964e323da697bb2188a9849e90f54764e92d"
+taskcluster-lib-app@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/taskcluster-lib-app/-/taskcluster-lib-app-1.0.0.tgz#e4f5c886a6484126d6734cd0aaeaa8f749db8aea"
   dependencies:
     babel-runtime "^6.0.14"
     debug "^2.2.0"
     express "4.9.0"
     express-sslify "0.1.0"
+    hsts "^1.0.0"
     lodash "2.4.1"
     morgan-debug "^1.0.0"
     promise "^7.0.4"
