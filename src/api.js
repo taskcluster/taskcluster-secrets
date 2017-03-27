@@ -23,6 +23,11 @@ let api = new API({
 // Export API
 module.exports = api;
 
+let cleanPayload = payload => {
+  payload.secret = "(OMITTED)";
+  return payload;
+};
+
 api.declare({
   method:      'put',
   route:       '/secret/:name(*)',
@@ -32,7 +37,7 @@ api.declare({
   scopes:      [['secrets:set:<name>']],
   title:       'Set Secret',
   stability:    'stable',
-  cleanPayload: payload => ({...payload, secret: "(OMITTED)"}),
+  cleanPayload,
   description: [
     "Set the secret associated with some key.  If the secret already exists, it is",
     "updated instead."

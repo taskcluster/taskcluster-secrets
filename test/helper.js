@@ -3,7 +3,7 @@ import api from '../lib/api';
 import taskcluster from 'taskcluster-client';
 import mocha from 'mocha';
 import testing from 'taskcluster-lib-testing';
-import load from '../bin/main';
+import load from '../lib/main';
 import config from 'typed-env-config';
 
 // Create and export helper object

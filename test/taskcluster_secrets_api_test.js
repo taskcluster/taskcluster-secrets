@@ -3,7 +3,7 @@ suite("TaskCluster-Secrets", () => {
   var assert = require('assert');
   var slugid = require('slugid');
   var taskcluster = require('taskcluster-client');
-  var load = require('../bin/main');
+  var load = require('../lib/main');
 
   let testValueExpires  = {
     secret: {data: "bar"},
