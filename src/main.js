@@ -12,7 +12,6 @@ import monitor from 'taskcluster-lib-monitor';
 import app from 'taskcluster-lib-app';
 import docs from 'taskcluster-lib-docs';
 import taskcluster from 'taskcluster-client';
-import stats from 'taskcluster-lib-stats';
 import config from 'typed-env-config';
 
 let debug = Debug('secrets:server');
@@ -28,7 +27,7 @@ var load = loader({
     setup: ({process, profile, cfg}) => monitor({
       project: 'taskcluster-secrets',
       credentials: cfg.taskcluster.credentials,
-      mock: profile === 'test',
+      mock: profile !== 'production',
       process,
     }),
   },
@@ -49,7 +48,6 @@ var load = loader({
       table:            cfg.azure.tableName,
       cryptoKey:        cfg.azure.cryptoKey,
       signingKey:       cfg.azure.signingKey,
-      component:        cfg.taskclusterSecrets.statsComponent,
       monitor:          monitor.prefix(cfg.azure.tableName.toLowerCase()),
     }),
   },
@@ -63,7 +61,6 @@ var load = loader({
       baseUrl:          cfg.server.publicUrl + '/v1',
       referencePrefix:  'secrets/v1/api.json',
       aws:              cfg.aws,
-      component:        cfg.taskclusterSecrets.statsComponent,
       monitor:          monitor.prefix('api'),
       validator,
     }),
