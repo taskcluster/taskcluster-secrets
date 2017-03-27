@@ -20,7 +20,7 @@ let debug = Debug('secrets:server');
 var load = loader({
   cfg: {
     requires: ['profile'],
-    setup: ({profile}) => config({profile})
+    setup: ({profile}) => config({profile}),
   },
 
   monitor: {
@@ -51,7 +51,7 @@ var load = loader({
       signingKey:       cfg.azure.signingKey,
       component:        cfg.taskclusterSecrets.statsComponent,
       monitor:          monitor.prefix(cfg.azure.tableName.toLowerCase()),
-    })
+    }),
   },
 
   router: {
@@ -66,7 +66,7 @@ var load = loader({
       component:        cfg.taskclusterSecrets.statsComponent,
       monitor:          monitor.prefix('api'),
       validator,
-    })
+    }),
   },
 
   docs: {
@@ -82,7 +82,7 @@ var load = loader({
         },
       ],
     }),
-	},
+  },
 
   server: {
     requires: ['cfg', 'router', 'docs'],
@@ -91,7 +91,7 @@ var load = loader({
         port:           Number(process.env.PORT || cfg.server.port),
         env:            cfg.server.env,
         forceSSL:       cfg.server.forceSSL,
-        trustProxy:     cfg.server.trustProxy
+        trustProxy:     cfg.server.trustProxy,
       });
 
       // Mount API router
@@ -99,7 +99,7 @@ var load = loader({
 
       // Create server
       return secretsApp.createServer();
-    }
+    },
   },
 
   expire: {
@@ -108,11 +108,11 @@ var load = loader({
       // Find an secret expiration delay
       var delay = cfg.taskclusterSecrets.secretExpirationDelay;
       var now   = taskcluster.fromNow(delay);
-      assert(!_.isNaN(now), "Can't have NaN as now");
+      assert(!_.isNaN(now), 'Can\'t have NaN as now');
 
-      debug("Expiring secrets");
+      debug('Expiring secrets');
       let count = await entity.expire(now);
-      debug("Expired " + count + " secrets");
+      debug('Expired ' + count + ' secrets');
     },
   },
 }, ['process', 'profile']);

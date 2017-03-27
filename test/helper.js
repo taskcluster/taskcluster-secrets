@@ -30,14 +30,14 @@ var testClients = [
     clientId:     'captain-read-write',
     scopes:       [
       'secrets:set:captain:*',
-      'secrets:get:captain:*'
+      'secrets:get:captain:*',
     ],
   }, {
     clientId:     'captain-read-limited',
     scopes:       [
-      'secrets:get:captain:limited/*'
+      'secrets:get:captain:limited/*',
     ],
-  }
+  },
 ];
 
 var SecretsClient = taskcluster.createClient(
@@ -70,7 +70,7 @@ mocha.before(async () => {
 
 // Cleanup after tests
 mocha.after(async () => {
-  testing.fakeauth.stop()
+  testing.fakeauth.stop();
   await webServer.terminate();
 });
 
