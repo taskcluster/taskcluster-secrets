@@ -64,7 +64,7 @@ api.declare({
       });
     }
   }
-  res.status(200).json({});
+  res.reply({});
 });
 
 api.declare({
@@ -87,15 +87,12 @@ api.declare({
     await this.entity.remove({name: name});
   } catch (e) {
     if (e.name == 'ResourceNotFoundError') {
-      res.status(404).json({
-        message: 'Secret not found',
-      });
-      return;
+      return res.reportError('ResourceNotFound', 'Secret not found', {});
     } else {
       throw e;
     }
   }
-  res.status(200).json({});
+  res.reply({});
 });
 
 api.declare({
@@ -123,20 +120,15 @@ api.declare({
     item = await this.entity.load({name});
   } catch (e) {
     if (e.name == 'ResourceNotFoundError') {
-      res.status(404).json({
-        message: 'Secret not found',
-      });
-      return;
+      return res.reportError('ResourceNotFound', 'Secret not found', {});
     } else {
       throw e;
     }
   }
   if (item.isExpired()) {
-    res.status(410).json({
-      message: 'The requested resource has expired.',
-    });
+    return res.reportError('ResourceExpired', 'The requested resource has expired.', {});
   } else {
-    res.status(200).json(item.json());
+    res.reply(item.json());
   }
 });
 

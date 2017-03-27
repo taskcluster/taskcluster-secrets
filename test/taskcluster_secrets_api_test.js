@@ -152,7 +152,7 @@ suite('TaskCluster-Secrets', () => {
         if (e.statusCode) {
           assert.deepEqual(options.statusCode, e.statusCode);
           if (options.errMessage) {
-            assert.deepEqual(options.errMessage, e.body.message);
+            assert(e.body.message.startsWith(options.errMessage));
           }
           // if there's a payload, the secret should be obscured
           if (e.body.requestInfo && e.body.requestInfo.payload.secret) {
