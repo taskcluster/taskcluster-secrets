@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "assume": "^1.2.4",
-    "azure-entities": "^0.9.1",
+    "azure-entities": "^1.4.0",
     "babel-compile": "^2.0.0",
     "babel-preset-taskcluster": "^3.0.0",
     "debug": "^2.1.3",
