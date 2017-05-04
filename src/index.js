@@ -1,22 +1,19 @@
-#!/usr/bin/env node
 import Debug from 'debug';
-import api from '../lib/api';
-import data from '../lib/data';
+import {SecretEntity} from './SecretEntity';
 import assert from 'assert';
-import path from 'path';
-import Promise from 'promise';
-import _ from 'lodash';
+import {isNaN} from 'lodash';
 import loader from 'taskcluster-lib-loader';
 import validator from 'taskcluster-lib-validate';
 import monitor from 'taskcluster-lib-monitor';
 import app from 'taskcluster-lib-app';
 import docs from 'taskcluster-lib-docs';
-import taskcluster from 'taskcluster-client';
+import {fromNow} from 'taskcluster-client';
 import config from 'typed-env-config';
+import api from './api';
 
 let debug = Debug('secrets:server');
 
-var load = loader({
+export default loader({
   cfg: {
     requires: ['profile'],
     setup: ({profile}) => config({profile}),
@@ -42,7 +39,7 @@ var load = loader({
 
   entity: {
     requires: ['cfg', 'monitor', 'process'],
-    setup: ({cfg, monitor, process}) => data.SecretEntity.setup({
+    setup: ({cfg, monitor, process}) => SecretEntity.setup({
       account:          cfg.azure.accountName,
       credentials:      cfg.taskcluster.credentials,
       table:            cfg.azure.tableName,
@@ -75,7 +72,7 @@ var load = loader({
       references: [
         {
           name: 'api',
-          reference: api.reference({baseUrl: cfg.server.publicUrl + '/v1'}),
+          reference: api.reference({baseUrl: `${cfg.server.publicUrl}/v1`}),
         },
       ],
     }),
@@ -103,27 +100,13 @@ var load = loader({
     requires: ['cfg', 'entity'],
     setup: async ({cfg, entity}) => {
       // Find an secret expiration delay
-      var delay = cfg.taskclusterSecrets.secretExpirationDelay;
-      var now   = taskcluster.fromNow(delay);
-      assert(!_.isNaN(now), 'Can\'t have NaN as now');
+      let delay = cfg.taskclusterSecrets.secretExpirationDelay;
+      let now   = fromNow(delay);
+      assert(!isNaN(now), `Can't have NaN as now`);
 
       debug('Expiring secrets');
       let count = await entity.expire(now);
-      debug('Expired ' + count + ' secrets');
+      debug(`Expired ${count} secrets`);
     },
   },
 }, ['process', 'profile']);
-
-// If this file is executed launch component from first argument
-if (!module.parent) {
-  load(process.argv[2], {
-    process: process.argv[2],
-    profile: process.env.NODE_ENV,
-  }).catch(err => {
-    console.log(err.stack);
-    process.exit(1);
-  });
-}
-
-// Export load for tests
-module.exports = load;

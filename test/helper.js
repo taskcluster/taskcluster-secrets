@@ -1,22 +1,20 @@
-import assert from 'assert';
-import api from '../lib/api';
-import taskcluster from 'taskcluster-client';
-import mocha from 'mocha';
+import api from '../src/api';
+import {createClient} from 'taskcluster-client';
 import testing from 'taskcluster-lib-testing';
-import load from '../lib/main';
+import load from '../src';
 import config from 'typed-env-config';
 
 // Create and export helper object
-var helper = module.exports = {};
+let helper = {};
 
 // Load configuration
-var cfg = config({profile: 'test'});
-const baseUrl = cfg.server.publicUrl + '/v1';
+let cfg = config({profile: 'test'});
+const baseUrl = `${cfg.server.publicUrl}/v1`;
 
 // Some clients for the tests, with differents scopes.  These are turned
 // into temporary credentials based on the main test credentials, so
 // the clientIds listed here are purely internal to the tests.
-var testClients = [
+let testClients = [
   {
     clientId:     'captain-write', // can write captain's secrets
     scopes:       [
@@ -40,23 +38,21 @@ var testClients = [
   },
 ];
 
-var SecretsClient = taskcluster.createClient(
-  api.reference({baseUrl: baseUrl})
-);
+let SecretsClient = createClient(api.reference({baseUrl}));
 
-var webServer = null;
+let webServer = null;
 
 // Setup before tests
-mocha.before(async () => {
+before(async () => {
   // Set up all of our clients, each with a different clientId
   helper.clients = {};
-  var auth = {};
-  for (let client of testClients) {
-    helper.clients[client.clientId] = new SecretsClient({
+  let auth = {};
+  for (let {clientId, scopes} of testClients) {
+    helper.clients[clientId] = new SecretsClient({
       baseUrl:          baseUrl,
-      credentials:      {clientId: client.clientId, accessToken: 'unused'},
+      credentials:      {clientId: clientId, accessToken: 'unused'},
     });
-    auth[client.clientId] = client.scopes;
+    auth[clientId] = scopes;
   }
   testing.fakeauth.start(auth);
 
@@ -69,8 +65,9 @@ mocha.before(async () => {
 });
 
 // Cleanup after tests
-mocha.after(async () => {
+after(async () => {
   testing.fakeauth.stop();
   await webServer.terminate();
 });
 
+export default helper;

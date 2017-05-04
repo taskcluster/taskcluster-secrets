@@ -1,1 +1,1 @@
-web: NODE_ENV=production node lib/main.js server
+web: NODE_ENV=production bin/taskcluster-secrets server

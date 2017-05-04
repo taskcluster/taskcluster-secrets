@@ -2,30 +2,24 @@
   "name": "taskcluster-secrets",
   "version": "1.0.0",
   "private": true,
+  "main": "lib/index.js",
+  "bin": {
+    "taskcluster-secrets": "bin/taskcluster-secrets"
+  },
   "scripts": {
-    "test": "mocha .test/lint.js .test/*_test.js",
-    "compile": "babel-compile -p taskcluster src:lib test:.test",
-    "pretest": "npm run compile",
-    "install": "npm run compile"
+    "pretest": "yarn build",
+    "install": "yarn build",
+    "test": "neutrino test --use neutrino-preset-taskcluster",
+    "build": "neutrino build --use neutrino-preset-taskcluster"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/taskcluster/taskcluster-secrets.git"
-  },
+  "repository": "taskcluster/taskcluster-secrets",
   "dependencies": {
     "assume": "^1.2.4",
     "azure-entities": "^1.4.0",
-    "babel-compile": "^2.0.0",
-    "babel-preset-taskcluster": "^3.0.0",
     "debug": "^2.1.3",
-    "eslint-config-taskcluster": "^2.0.0",
-    "eslint-plugin-taskcluster": "^1.0.2",
     "hawk": "^2.3.0",
     "lodash": "^3.6.0",
-    "mocha": "^2.2.1",
-    "mocha-eslint": "^3.0.1",
     "nock": "^4.0.0",
-    "promise": "^6.1.0",
     "slugid": "^1.1.0",
     "source-map-support": "^0.4.14",
     "taskcluster-client": "^1.6.3",
@@ -42,5 +36,9 @@
   "engines": {
     "node": "7.4.0",
     "yarn": "0.21.3"
+  },
+  "devDependencies": {
+    "neutrino": "^5.8.0",
+    "neutrino-preset-taskcluster": "^4.0.0"
   }
 }

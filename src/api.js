@@ -1,6 +1,4 @@
 import API from 'taskcluster-lib-api';
-import slugid from 'slugid';
-import _ from 'lodash';
 
 let SCHEMA_PREFIX_CONST = 'http://schemas.taskcluster.net/secrets/v1/';
 
@@ -21,7 +19,7 @@ let api = new API({
 });
 
 // Export API
-module.exports = api;
+export default api;
 
 let cleanPayload = payload => {
   payload.secret = '(OMITTED)';
