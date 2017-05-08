@@ -6,11 +6,11 @@ The secrets service allows task cluster clients with appropriate scopes to write
 
 The service expects the following to run periodically (daily?) to flush expired secrets:
 
-    NODE_ENV=production node lib/main.js expire
+    NODE_ENV=production bin/taskcluster-secrets expire
 
 # Running Tests
 
-From the project's base ``yarn install`` then ``yarn test``.
+From the project's base `yarn install` then `yarn test`.
 No special configuration is required.
 
 # Deploying

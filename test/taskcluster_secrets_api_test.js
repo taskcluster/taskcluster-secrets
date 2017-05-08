@@ -1,21 +1,21 @@
-suite('TaskCluster-Secrets', () => {
-  var helper = require('./helper');
-  var assert = require('assert');
-  var slugid = require('slugid');
-  var taskcluster = require('taskcluster-client');
-  var load = require('../lib/main');
+import helper from './helper';
+import assert from 'assert';
+import slugid from 'slugid';
+import {fromNowJSON} from 'taskcluster-client';
+import load from '../src';
 
+suite('TaskCluster-Secrets', () => {
   let testValueExpires  = {
     secret: {data: 'bar'},
-    expires: taskcluster.fromNowJSON('1 day'),
+    expires: fromNowJSON('1 day'),
   };
   let testValueExpires2 = {
     secret: {data: 'foo'},
-    expires: taskcluster.fromNowJSON('1 day'),
+    expires: fromNowJSON('1 day'),
   };
   let testValueExpired  = {
     secret: {data: 'bar'},
-    expires: taskcluster.fromNowJSON('- 2 hours'),
+    expires: fromNowJSON('- 2 hours'),
   };
 
   const FOO_KEY = slugid.v4();
@@ -27,7 +27,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain, write allowed key',
       clientName: 'captain-write',
       apiCall:    'set',
-      name:       'captain:' + FOO_KEY,
+      name:       `captain:${FOO_KEY}`,
       args:       testValueExpires,
       res:        {},
     },
@@ -35,7 +35,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain, write allowed key again',
       clientName: 'captain-write',
       apiCall:    'set',
-      name:       'captain:' + FOO_KEY,
+      name:       `captain:${FOO_KEY}`,
       args:       testValueExpires,
       res:        {},
     },
@@ -43,7 +43,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain, write disallowed key',
       clientName: 'captain-write',
       apiCall:    'set',
-      name:       'tennille:' + FOO_KEY,
+      name:       `tennille:${FOO_KEY}`,
       args:       testValueExpires,
       statusCode: 403, // It's not authorized!
     },
@@ -51,7 +51,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain (write only), fail to read.',
       clientName: 'captain-write',
       apiCall:    'get',
-      name:        'captain:' + FOO_KEY,
+      name:        `captain:${FOO_KEY}`,
       statusCode: 403, // it's not authorized!
     },
     {
@@ -59,27 +59,27 @@ suite('TaskCluster-Secrets', () => {
       clientName: 'captain-write',
       apiCall:    'set',
       args:       testValueExpires2,
-      name:       'captain:' + FOO_KEY,
+      name:       `captain:${FOO_KEY}`,
     },
     {
       testName:   'Captain (read only), read foo.',
       clientName: 'captain-read',
       apiCall:    'get',
-      name:       'captain:' + FOO_KEY,
+      name:       `captain:${FOO_KEY}`,
       res:        testValueExpires2,
     },
     {
       testName:   'Captain (read only), read updated foo.',
       clientName: 'captain-read',
       apiCall:    'get',
-      name:        'captain:' + FOO_KEY,
+      name:        `captain:${FOO_KEY}`,
       res:        testValueExpires2,
     },
     {
       testName:   'Captain, update allowed key again',
       clientName: 'captain-write',
       apiCall:    'set',
-      name:        'captain:' + FOO_KEY,
+      name:        `captain:${FOO_KEY}`,
       args:       testValueExpires2,
       res:        {},
     },
@@ -87,21 +87,21 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain (read only), read updated foo again',
       clientName: 'captain-read',
       apiCall:    'get',
-      name:        'captain:' + FOO_KEY,
+      name:        `captain:${FOO_KEY}`,
       res:        testValueExpires2,
     },
     {
       testName:   'Captain (write only), delete foo.',
       clientName: 'captain-write',
       apiCall:    'remove',
-      name:        'captain:' + FOO_KEY,
+      name:        `captain:${FOO_KEY}`,
       res:        {},
     },
     {
       testName:   'Captain (read only), read deleted foo.',
       clientName: 'captain-read',
       apiCall:    'get',
-      name:        'captain:' + FOO_KEY,
+      name:        `captain:${FOO_KEY}`,
       statusCode: 404,
       errMessage: 'Secret not found',
     },
@@ -109,7 +109,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain (write only), delete already deleted foo.',
       clientName: 'captain-write',
       apiCall:    'remove',
-      name:        'captain:' + FOO_KEY,
+      name:        `captain:${FOO_KEY}`,
       statusCode: 404,
       errMessage: 'Secret not found',
     },
@@ -117,7 +117,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain (write only), write bar that is expired.',
       clientName: 'captain-write',
       apiCall:    'set',
-      name:        'captain:' + BAR_KEY,
+      name:        `captain:${BAR_KEY}`,
       args:       testValueExpired,
       res:        {},
     },
@@ -125,7 +125,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain (read only), read bar that is expired.',
       clientName: 'captain-read',
       apiCall:    'get',
-      name:        'captain:' + BAR_KEY,
+      name:        `captain:${BAR_KEY}`,
       statusCode: 410,
       errMessage: 'The requested resource has expired.',
     },
@@ -133,7 +133,7 @@ suite('TaskCluster-Secrets', () => {
       testName:   'Captain (write only), delete bar.',
       clientName: 'captain-write',
       apiCall:    'remove',
-      name:        'captain:' + BAR_KEY,
+      name:        `captain:${BAR_KEY}`,
       res:        {},
     },
   ];
@@ -172,7 +172,7 @@ suite('TaskCluster-Secrets', () => {
 
   test('Expire secrets', async () => {
     let secrets = helper.clients['captain-read-write'];
-    let key = 'captain:' + slugid.v4();
+    let key = `captain:${slugid.v4()}`;
 
     // Create a secret
     await secrets.set(key, {
@@ -180,7 +180,7 @@ suite('TaskCluster-Secrets', () => {
         message: 'keep this secret!!',
         list: ['hello', 'world'],
       },
-      expires: taskcluster.fromNowJSON('2 hours'),
+      expires: fromNowJSON('2 hours'),
     });
 
     let {secret} = await secrets.get(key);
@@ -221,11 +221,11 @@ suite('TaskCluster-Secrets', () => {
     // create some
     await secrets_rw.set('captain:hidden/1', {
       secret: {sekrit: 1},
-      expires: taskcluster.fromNowJSON('2 hours'),
+      expires: fromNowJSON('2 hours'),
     });
     await secrets_rw.set('captain:limited/1', {
       secret: {'less-sekrit': 1},
-      expires: taskcluster.fromNowJSON('2 hours'),
+      expires: fromNowJSON('2 hours'),
     });
 
     // secrets_rw can see both
