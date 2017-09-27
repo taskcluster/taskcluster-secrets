@@ -128,19 +128,30 @@ api.declare({
   output:      SCHEMA_PREFIX_CONST + 'secret-list.json#',
   title:       'List Secrets',
   stability:    'stable',
+  query: {
+    continuationToken: /./,
+    limit: /^[0-9]+$/,
+  },
   description: [
-    'List the names of all secrets that you would have access to read. In',
-    'other words, secret name `<X>` will only be returned if a) a secret',
-    'with name `<X>` exists, and b) you posses the scope `secrets:get:<X>`.',
+    'List the names of all secrets.',
+    '',
+    'By default this end-point will try to return up to 1000 secret names in one',
+    'request. But it **may return less**, even if more tasks are available.',
+    'It may also return a `continuationToken` even though there are no more',
+    'results. However, you can only be sure to have seen all results if you',
+    'keep calling `listTaskGroup` with the last `continuationToken` until you',
+    'get a result without a `continuationToken`.',
+    '',
+    'If you are not interested in listing all the members at once, you may',
+    'use the query-string option `limit` to return fewer.',
   ].join('\n'),
 }, async function(req, res) {
-  let secrets = [];
-  await this.entity.scan({}, {
-    handler: (item) => {
-      if (req.satisfies([['secrets:get:' + item.name]], true)) {
-        secrets.push(item.name);
-      }
-    },
+  const continuation = req.query.continuationToken || null;
+  const limit = Math.min(parseInt(req.query.limit || 1000, 10), 1000);
+  const query = await this.entity.scan({}, {continuation, limit});
+
+  return res.reply({
+    secrets: query.entries.map(secret => secret.name),
+    continuationToken: query.continuation || undefined,
   });
-  return res.reply({secrets});
 });

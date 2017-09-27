@@ -235,14 +235,8 @@ suite('TaskCluster-Secrets', () => {
       expires: taskcluster.fromNowJSON('2 hours'),
     });
 
-    // secrets_rw can see both
     list = await secrets_rw.list();
     list.secrets.sort();
     assert.deepEqual(list, {secrets: ['captain:hidden/1', 'captain:limited/1']});
-
-    // the limited client can only see the limited secret, too
-    list = await secrets_limited.list();
-    list.secrets.sort();
-    assert.deepEqual(list, {secrets: ['captain:limited/1']});
   });
 });
