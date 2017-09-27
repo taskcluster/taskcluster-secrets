@@ -31,7 +31,6 @@ let cleanPayload = payload => {
 api.declare({
   method:      'put',
   route:       '/secret/:name(*)',
-  deferAuth:   true,
   name:        'set',
   input:       SCHEMA_PREFIX_CONST + 'secret.json#',
   scopes:      [['secrets:set:<name>']],
@@ -45,9 +44,6 @@ api.declare({
 }, async function(req, res) {
   let {name} = req.params;
   let {secret, expires} = req.body;
-  if (!req.satisfies({name})) {
-    return;
-  }
   try {
     await this.entity.create({
       name:       name,
@@ -70,7 +66,6 @@ api.declare({
 api.declare({
   method:      'delete',
   route:       '/secret/:name(*)',
-  deferAuth:   true,
   name:        'remove',
   scopes:      [['secrets:set:<name>']],
   title:       'Delete Secret',
@@ -80,9 +75,6 @@ api.declare({
   ].join('\n'),
 }, async function(req, res) {
   let {name} = req.params;
-  if (!req.satisfies({name})) {
-    return;
-  }
   try {
     await this.entity.remove({name: name});
   } catch (e) {
@@ -98,7 +90,6 @@ api.declare({
 api.declare({
   method:      'get',
   route:       '/secret/:name(*)',
-  deferAuth:   true,
   name:        'get',
   output:      SCHEMA_PREFIX_CONST + 'secret.json#',
   scopes:      [['secrets:get:<name>']],
@@ -112,9 +103,6 @@ api.declare({
   ].join('\n'),
 }, async function(req, res) {
   let {name} = req.params;
-  if (!req.satisfies({name})) {
-    return;
-  }
   let item = undefined;
   try {
     item = await this.entity.load({name});

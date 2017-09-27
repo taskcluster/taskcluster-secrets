@@ -91,6 +91,13 @@ suite('TaskCluster-Secrets', () => {
       res:        testValueExpires2,
     },
     {
+      testName:   'Captain (read only), delete key not permitted',
+      clientName: 'captain-read',
+      apiCall:    'remove',
+      name:        'captain:' + FOO_KEY,
+      statusCode: 403, // It's not authorized!
+    },
+    {
       testName:   'Captain (write only), delete foo.',
       clientName: 'captain-write',
       apiCall:    'remove',
