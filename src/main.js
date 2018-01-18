@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import Debug from 'debug';
-import api from '../lib/api';
-import data from '../lib/data';
+import api from '../src/api';
+import data from '../src/data';
 import assert from 'assert';
 import path from 'path';
 import Promise from 'promise';

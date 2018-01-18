@@ -1,9 +1,9 @@
 import assert from 'assert';
-import api from '../lib/api';
+import api from '../src/api';
 import taskcluster from 'taskcluster-client';
 import mocha from 'mocha';
 import testing from 'taskcluster-lib-testing';
-import load from '../lib/main';
+import load from '../src/main';
 import config from 'typed-env-config';
 
 // Create and export helper object
