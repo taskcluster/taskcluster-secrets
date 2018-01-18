@@ -51,7 +51,7 @@ api.declare({
       expires:    new Date(expires),
     });
   } catch (e) {
-      // If the entity exists, update it
+    // If the entity exists, update it
     if (e.name == 'EntityAlreadyExistsError') {
       let item = await this.entity.load({name});
       await item.modify(function() {
