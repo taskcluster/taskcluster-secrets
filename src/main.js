@@ -4,7 +4,6 @@ import api from '../src/api';
 import data from '../src/data';
 import assert from 'assert';
 import path from 'path';
-import Promise from 'promise';
 import _ from 'lodash';
 import loader from 'taskcluster-lib-loader';
 import validator from 'taskcluster-lib-validate';
