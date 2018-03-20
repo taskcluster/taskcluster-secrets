@@ -19,6 +19,7 @@ let api = new API({
     'service credential or a one-time signing key.',
   ].join('\n'),
   name:          'secrets',
+  context: ['cfg', 'entity'],
 });
 
 // Export API
@@ -33,6 +34,7 @@ api.declare({
   method:      'put',
   route:       '/secret/:name(*)',
   name:        'set',
+  context:     ['prop1', 'prop2'],
   input:       SCHEMA_PREFIX_CONST + 'secret.json#',
   scopes:      'secrets:set:<name>',
   title:       'Set Secret',
