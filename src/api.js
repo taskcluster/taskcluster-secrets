@@ -61,6 +61,8 @@ api.declare({
         this.secret = secret;
         this.expires = new Date(expires);
       });
+    } else {
+      throw e;
     }
   }
   res.reply({});
