@@ -12,9 +12,8 @@ defaults:
     # BaseUrl for auth, if default built-in baseUrl isn't to be provided
     authBaseUrl:                  'https://auth.taskcluster.net/v1'
 
-    # TaskCluster credentials for this server, these must have scopes:
-    # auth:credentials
-    # (typically configured using environment variables)
+    # TaskCluster credentials for this server, allowing access to the Azure table,
+    # sentry, statsum, etc.
     credentials:
       clientId:                   !env TASKCLUSTER_CLIENT_ID
       accessToken:                !env TASKCLUSTER_ACCESS_TOKEN
@@ -79,14 +78,11 @@ test:
   taskclusterSecrets:
     publishMetaData: false
     statsComponent:               'test-queue'
-    # Time delay before expiring secrets, in readable format, see:
-    # taskcluster.fromNow, notice this should be negative!
-    # But in testing we just expire secrets 4 days into the future that's good
-    # fun :)
+    # four days in the future, so secrets are always expired
     secretExpirationDelay:        '4 days'
 
   azure:
-    accountName:                  'inMemory'
+    accountName:                  'jungle'
     tableName:                    'SecretsTestTable'
     cryptoKey:                    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
     signingKey:                   'REALULTIMATEPOWER.NET'

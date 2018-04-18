@@ -1,19 +1,19 @@
-suite('TaskCluster-Secrets', () => {
-  var helper = require('./helper');
-  var assert = require('assert');
-  var slugid = require('slugid');
-  var taskcluster = require('taskcluster-client');
-  var load = require('../src/main');
+const helper = require('./helper');
+const assert = require('assert');
+const slugid = require('slugid');
+const data = require('../src/data');
+const taskcluster = require('taskcluster-client');
 
-  let testValueExpires  = {
+suite('TaskCluster-Secrets', () => {
+  const testValueExpires  = {
     secret: {data: 'bar'},
     expires: taskcluster.fromNowJSON('1 day'),
   };
-  let testValueExpires2 = {
+  const testValueExpires2 = {
     secret: {data: 'foo'},
     expires: taskcluster.fromNowJSON('1 day'),
   };
-  let testValueExpired  = {
+  const testValueExpired  = {
     secret: {data: 'bar'},
     expires: taskcluster.fromNowJSON('- 2 hours'),
   };
@@ -21,7 +21,7 @@ suite('TaskCluster-Secrets', () => {
   const FOO_KEY = slugid.v4();
   const BAR_KEY = slugid.v4();
 
-  let testData = [
+  const testData = [
     // The "Captain" clients
     {
       testName:   'Captain, write allowed key',
@@ -145,98 +145,128 @@ suite('TaskCluster-Secrets', () => {
     },
   ];
 
-  for (let options of testData) {
-    test(options.testName, async () => {
-      let client = helper.clients[options.clientName];
-      let res = undefined;
-      try {
-        if (options.args) {
-          res = await client[options.apiCall](options.name, options.args);
-        } else {
-          res = await client[options.apiCall](options.name);
-        }
-      } catch (e) {
-        if (e.statusCode) {
-          assert.deepEqual(options.statusCode, e.statusCode);
-          if (options.errMessage) {
-            assert(e.body.message.startsWith(options.errMessage));
-          }
-          // if there's a payload, the secret should be obscured
-          if (e.body.requestInfo && e.body.requestInfo.payload.secret) {
-            assert.equal(e.body.requestInfo.payload.secret, '(OMITTED)');
-          }
-          options.statusCode = null; // it's handled now
-        } else {
-          throw e; // if there's no statusCode this isn't an API error
-        }
+  helper.secrets.mockSuite('getting/setting', ['taskcluster'], function(mock) {
+    let webServer;
+
+    suiteSetup(async function() {
+      webServer = null;
+
+      if (mock) {
+        helper.load.cfg('azure.accountName', 'inMemory');
       }
-      assert(!options.statusCode, 'did not get expected error');
-      options.res && Object.keys(options.res).forEach(key => {
-        assert.deepEqual(res[key], options.res[key]);
+
+      const entity = await helper.load('entity');
+      await entity.ensureTable();
+
+      webServer = await helper.load('server');
+    });
+
+    suiteTeardown(async function() {
+      if (webServer) {
+        await webServer.terminate();
+      }
+    });
+
+    testData.forEach(options => {
+      test(options.testName, async () => {
+        let client = helper.clients[options.clientName];
+        let res = undefined;
+        try {
+          if (options.args) {
+            res = await client[options.apiCall](options.name, options.args);
+          } else {
+            res = await client[options.apiCall](options.name);
+          }
+        } catch (e) {
+          if (e.statusCode) {
+            assert(options.statusCode, `got unexpected error: ${e}`);
+            assert.deepEqual(options.statusCode, e.statusCode);
+            if (options.errMessage) {
+              assert(e.body.message.startsWith(options.errMessage));
+            }
+            // if there's a payload, the secret should be obscured
+            if (e.body.requestInfo && e.body.requestInfo.payload.secret) {
+              assert.equal(e.body.requestInfo.payload.secret, '(OMITTED)');
+            }
+            return;
+          } else {
+            throw e; // if there's no statusCode this isn't an API error
+          }
+        }
+        assert(!options.statusCode, 'did not get expected error');
+        options.res && Object.keys(options.res).forEach(key => {
+          assert.deepEqual(res[key], options.res[key]);
+        });
       });
     });
-  }
 
-  test('Expire secrets', async () => {
-    let secrets = helper.clients['captain-read-write'];
-    let key = 'captain:' + slugid.v4();
+    test('Expire secrets', async () => {
+      let secrets = helper.clients['captain-read-write'];
+      let key = 'captain:' + slugid.v4();
 
-    // Create a secret
-    await secrets.set(key, {
-      secret: {
-        message: 'keep this secret!!',
-        list: ['hello', 'world'],
-      },
-      expires: taskcluster.fromNowJSON('2 hours'),
-    });
+      helper.load.save();
 
-    let {secret} = await secrets.get(key);
-    assert.deepEqual(secret, {
-      message: 'keep this secret!!',
-      list: ['hello', 'world'],
-    });
+      try {
+        // Create a secret
+        await secrets.set(key, {
+          secret: {
+            message: 'keep this secret!!',
+            list: ['hello', 'world'],
+          },
+          expires: taskcluster.fromNowJSON('2 hours'),
+        });
 
-    // Remember that config/test.js sets the expiration to 4 days into the
-    // future so we really expect secrets to be deleted
-    await load('expire', {profile: 'test', process: 'test'});
+        let {secret} = await secrets.get(key);
+        assert.deepEqual(secret, {
+          message: 'keep this secret!!',
+          list: ['hello', 'world'],
+        });
 
-    try {
-      await secrets.get(key);
-    } catch (err) {
-      if (err.statusCode === 404) {
-        return;
+        // config.yml sets the expiration to 4 days into the
+        // future so we really expect secrets to be deleted
+        await helper.load('expire');
+
+        try {
+          await secrets.get(key);
+        } catch (err) {
+          if (err.statusCode === 404) {
+            return;
+          }
+          throw err;
+        }
+        assert(false, 'Expected an error');
+      } finally {
+        helper.load.restore();
       }
-      throw err;
-    }
-    assert(false, 'Expected an error');
-  });
-
-  test('List secrets', async () => {
-    let secrets_rw = helper.clients['captain-read-write'];
-    let secrets_limited = helper.clients['captain-read-limited'];
-
-    // delete any secrets we can see
-    let list = await secrets_rw.list();
-    for (let secret of list.secrets) {
-      await secrets_rw.remove(secret);
-    }
-
-    // assert the list is empty
-    list = await secrets_rw.list();
-    assert.deepEqual(list, {secrets: []});
-
-    // create some
-    await secrets_rw.set('captain:hidden/1', {
-      secret: {sekrit: 1},
-      expires: taskcluster.fromNowJSON('2 hours'),
-    });
-    await secrets_rw.set('captain:limited/1', {
-      secret: {'less-sekrit': 1},
-      expires: taskcluster.fromNowJSON('2 hours'),
     });
 
-    list = await secrets_rw.list();
-    list.secrets.sort();
-    assert.deepEqual(list, {secrets: ['captain:hidden/1', 'captain:limited/1']});
+    test('List secrets', async () => {
+      let secrets_rw = helper.clients['captain-read-write'];
+      let secrets_limited = helper.clients['captain-read-limited'];
+
+      // delete any secrets we can see
+      let list = await secrets_rw.list();
+      for (let secret of list.secrets) {
+        await secrets_rw.remove(secret);
+      }
+
+      // assert the list is empty
+      list = await secrets_rw.list();
+      assert.deepEqual(list, {secrets: []});
+
+      // create some
+      await secrets_rw.set('captain:hidden/1', {
+        secret: {sekrit: 1},
+        expires: taskcluster.fromNowJSON('2 hours'),
+      });
+      await secrets_rw.set('captain:limited/1', {
+        secret: {'less-sekrit': 1},
+        expires: taskcluster.fromNowJSON('2 hours'),
+      });
+
+      list = await secrets_rw.list();
+      list.secrets.sort();
+      assert.deepEqual(list, {secrets: ['captain:hidden/1', 'captain:limited/1']});
+    });
   });
 });
