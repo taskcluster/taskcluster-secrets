@@ -4,7 +4,7 @@ const slugid = require('slugid');
 const data = require('../src/data');
 const taskcluster = require('taskcluster-client');
 
-suite('TaskCluster-Secrets', () => {
+suite('api_test.js', () => {
   const testValueExpires  = {
     secret: {data: 'bar'},
     expires: taskcluster.fromNowJSON('1 day'),
