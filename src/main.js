@@ -36,7 +36,7 @@ var load = loader({
     requires: ['cfg'],
     setup: ({cfg}) => validator({
       prefix: 'secrets/v1/',
-      publish: cfg.taskclusterSecrets.publishMetaData,
+      publish: cfg.app.publishMetaData,
       aws: cfg.aws,
     }),
   },
@@ -58,7 +58,7 @@ var load = loader({
     setup: ({cfg, entity, validator, monitor}) => api.setup({
       context:          {cfg, entity},
       authBaseUrl:      cfg.taskcluster.authBaseUrl,
-      publish:          cfg.taskclusterSecrets.publishMetaData,
+      publish:          cfg.app.publishMetaData,
       baseUrl:          cfg.server.publicUrl + '/v1',
       referencePrefix:  'secrets/v1/api.json',
       aws:              cfg.aws,
@@ -73,7 +73,7 @@ var load = loader({
       credentials: cfg.taskcluster.credentials,
       tier: 'core',
       schemas: validator.schemas,
-      publish: cfg.taskclusterSecrets.publishMetaData,
+      publish: cfg.app.publishMetaData,
       references: [
         {
           name: 'api',
@@ -111,7 +111,7 @@ var load = loader({
     requires: ['cfg', 'entity'],
     setup: async ({cfg, entity}) => {
       // Find an secret expiration delay
-      var delay = cfg.taskclusterSecrets.secretExpirationDelay;
+      var delay = cfg.app.secretExpirationDelay;
       var now   = taskcluster.fromNow(delay);
       assert(!_.isNaN(now), 'Can\'t have NaN as now');
 

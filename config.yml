@@ -1,5 +1,5 @@
 defaults:
-  taskclusterSecrets:
+  app:
     publishMetaData:              !env:bool PUBLISH_METADATA
     statsComponent:               'secrets'
     # Time delay before expiring secrets, in readable format, see:
@@ -61,7 +61,7 @@ defaults:
     apiVersion:                     '2014-01-01'
 
 staging:
-  taskclusterSecrets:
+  app:
     statsComponent: 'secrets-staging'
 
 production:
@@ -75,7 +75,7 @@ production:
     trustProxy:                   true
 
 test:
-  taskclusterSecrets:
+  app:
     publishMetaData: false
     statsComponent:               'test-queue'
     # four days in the future, so secrets are always expired
