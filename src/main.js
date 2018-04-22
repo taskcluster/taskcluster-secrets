@@ -41,9 +41,9 @@ var load = loader({
     }),
   },
 
-  entity: {
+  Secret: {
     requires: ['cfg', 'monitor', 'process'],
-    setup: ({cfg, monitor, process}) => data.SecretEntity.setup({
+    setup: ({cfg, monitor, process}) => data.Secret.setup({
       account:          cfg.azure.accountName,
       credentials:      cfg.taskcluster.credentials,
       table:            cfg.azure.tableName,
@@ -54,9 +54,9 @@ var load = loader({
   },
 
   router: {
-    requires: ['cfg', 'entity', 'validator', 'monitor'],
-    setup: ({cfg, entity, validator, monitor}) => api.setup({
-      context:          {cfg, entity},
+    requires: ['cfg', 'Secret', 'validator', 'monitor'],
+    setup: ({cfg, Secret, validator, monitor}) => api.setup({
+      context:          {cfg, Secret},
       authBaseUrl:      cfg.taskcluster.authBaseUrl,
       publish:          cfg.app.publishMetaData,
       baseUrl:          cfg.server.publicUrl + '/v1',
@@ -108,15 +108,15 @@ var load = loader({
   },
 
   expire: {
-    requires: ['cfg', 'entity'],
-    setup: async ({cfg, entity}) => {
+    requires: ['cfg', 'Secret'],
+    setup: async ({cfg, Secret}) => {
       // Find an secret expiration delay
       var delay = cfg.app.secretExpirationDelay;
       var now   = taskcluster.fromNow(delay);
       assert(!_.isNaN(now), 'Can\'t have NaN as now');
 
       debug('Expiring secrets');
-      let count = await entity.expire(now);
+      let count = await Secret.expire(now);
       debug('Expired ' + count + ' secrets');
     },
   },

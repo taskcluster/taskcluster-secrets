@@ -22,7 +22,7 @@ suite('api_test.js', () => {
 
   helper.secrets.mockSuite('getting/setting', ['taskcluster'], function(mock) {
     let webServer;
-    let entity;
+    let Secret;
 
     suiteSetup(async function() {
       webServer = null;
@@ -31,8 +31,8 @@ suite('api_test.js', () => {
         helper.load.cfg('azure.accountName', 'inMemory');
       }
 
-      entity = await helper.load('entity');
-      await entity.ensureTable();
+      Secret = await helper.load('Secret');
+      await Secret.ensureTable();
 
       webServer = await helper.load('server');
     });
@@ -45,7 +45,7 @@ suite('api_test.js', () => {
 
     // clean out entities before each test and after the suite
     const cleanup = async function() {
-      await entity.remove({name: SECRET_NAME}, true);
+      await Secret.remove({name: SECRET_NAME}, true);
     };
     setup(cleanup);
     suiteTeardown(async function() {
@@ -172,7 +172,7 @@ suite('api_test.js', () => {
         name:        SECRET_NAME,
         res:        {},
       });
-      assert(!await entity.load({name: SECRET_NAME}, true));
+      assert(!await Secret.load({name: SECRET_NAME}, true));
     });
 
     test('getting a missing secret is a 404', async function() {
