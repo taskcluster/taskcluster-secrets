@@ -4,12 +4,15 @@ const slugid = require('slugid');
 const data = require('../src/data');
 const taskcluster = require('taskcluster-client');
 
-helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock) {
+helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping) {
   let webServer;
   let Secret;
 
   suiteSetup(async function() {
     webServer = null;
+    if (skipping()) {
+      return;
+    }
 
     if (mock) {
       helper.load.cfg('azure.accountName', 'inMemory');
@@ -29,14 +32,12 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock) {
 
   // clean out entities before each test and after the suite
   const cleanup = async function() {
-    await Secret.remove({name: SECRET_NAME}, true);
+    if (!skipping()) {
+      await Secret.remove({name: SECRET_NAME}, true);
+    }
   };
   setup(cleanup);
-  suiteTeardown(async function() {
-    if (!this.skip) {
-      await cleanup();
-    }
-  });
+  suiteTeardown(cleanup);
 
   const SECRET_NAME = `captain:${slugid.v4()}`;
   const testValueFoo  = {
