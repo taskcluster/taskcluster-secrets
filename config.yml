@@ -18,7 +18,7 @@ defaults:
       accessToken:                !env TASKCLUSTER_ACCESS_TOKEN
 
   azure:
-    accountName:                  !env AZURE_ACCOUNT
+    accountId:                    !env AZURE_ACCOUNT
     tableName:                    !env AZURE_TABLE_NAME
     cryptoKey:                    !env AZURE_CRYPTO_KEY
     signingKey:                   !env AZURE_SIGNING_KEY
@@ -81,7 +81,7 @@ test:
     secretExpirationDelay:        '4 days'
 
   azure:
-    accountName:                  'jungle'
+    accountId:                    'jungle'
     tableName:                    'SecretsTestTable'
     cryptoKey:                    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
     signingKey:                   'REALULTIMATEPOWER.NET'

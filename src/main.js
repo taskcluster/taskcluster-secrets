@@ -47,7 +47,7 @@ var load = loader({
     setup: ({cfg, monitor, process}) => data.Secret.setup({
       tableName:        cfg.azure.tableName,
       credentials: sasCredentials({
-        accountId: cfg.azure.accountName,
+        accountId: cfg.azure.accountId,
         tableName: cfg.azure.tableName,
         rootUrl: cfg.taskcluster.rootUrl,
         credentials: cfg.taskcluster.credentials,
