@@ -28,6 +28,7 @@
     "taskcluster-lib-docs": "^4.2.2",
     "taskcluster-lib-loader": "^2.0.0",
     "taskcluster-lib-monitor": "^5.4.0",
+    "taskcluster-lib-urls": "^1.0.0",
     "taskcluster-lib-validate": "^3.0.3",
     "typed-env-config": "^2.0.0"
   },
