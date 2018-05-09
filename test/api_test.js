@@ -15,14 +15,23 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
       return;
     }
 
-    helper.load.cfg('taskcluster.rootUrl', urls.testRootUrl());
     if (mock) {
-      helper.load.cfg('azure.accountName', 'inMemory');
+      const cfg = await helper.load('cfg');
+      helper.load.inject('Secret', data.Secret.setup({
+        tableName: 'Secret',
+        credentials: 'inMemory',
+        cryptoKey: cfg.azure.cryptoKey,
+        signingKey: cfg.azure.signingKey,
+      }));
     }
 
     Secret = await helper.load('Secret');
     await Secret.ensureTable();
 
+    // override the rootUrl that the server uses, so that it
+    // works with fakeAuth; this must be done after loading Secret,
+    // as that may want to use the real rootUrl for non-mock tests.
+    helper.load.cfg('taskcluster.rootUrl', urls.testRootUrl());
     webServer = await helper.load('server');
   });
 

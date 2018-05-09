@@ -12,6 +12,7 @@ const app = require('taskcluster-lib-app');
 const docs = require('taskcluster-lib-docs');
 const taskcluster = require('taskcluster-client');
 const config = require('typed-env-config');
+const {sasCredentials} = require('taskcluster-lib-azure');
 
 let debug = Debug('secrets:server');
 
@@ -44,9 +45,13 @@ var load = loader({
   Secret: {
     requires: ['cfg', 'monitor', 'process'],
     setup: ({cfg, monitor, process}) => data.Secret.setup({
-      account:          cfg.azure.accountName,
-      credentials:      cfg.taskcluster.credentials,
-      table:            cfg.azure.tableName,
+      tableName:        cfg.azure.tableName,
+      credentials: sasCredentials({
+        accountId: cfg.azure.accountName,
+        tableName: cfg.azure.tableName,
+        rootUrl: cfg.taskcluster.rootUrl,
+        credentials: cfg.taskcluster.credentials,
+      }),
       cryptoKey:        cfg.azure.cryptoKey,
       signingKey:       cfg.azure.signingKey,
       monitor:          monitor.prefix('table.secrets'),

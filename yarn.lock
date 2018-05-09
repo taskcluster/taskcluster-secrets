@@ -2320,6 +2320,20 @@ taskcluster-client@^3.0.3, taskcluster-client@^3.1.0, taskcluster-client@^3.1.1:
     slugid "^1.1.0"
     superagent "~3.8.1"
 
+taskcluster-client@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/taskcluster-client/-/taskcluster-client-5.0.0.tgz#6171941188be26a7c32f18ff80bc17486f60f24f"
+  dependencies:
+    amqplib "^0.5.1"
+    babel-runtime "^6.26.0"
+    debug "^3.1.0"
+    hawk "^6.0.2"
+    lodash "^4.17.4"
+    promise "^8.0.1"
+    slugid "^1.1.0"
+    superagent "~3.8.1"
+    taskcluster-lib-urls "^1.0.0"
+
 taskcluster-lib-api@8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/taskcluster-lib-api/-/taskcluster-lib-api-8.0.0.tgz#d459870d48134a3fdd14fc1c92b244807d6b7c2b"
@@ -2353,6 +2367,12 @@ taskcluster-lib-app@3.0.0:
     morgan "^1.9.0"
     morgan-debug "^2.0.0"
     promise "^8.0.1"
+
+"taskcluster-lib-azure@https://github.com/taskcluster/taskcluster-lib-azure#bug1460016":
+  version "0.0.0"
+  resolved "https://github.com/taskcluster/taskcluster-lib-azure#e6a06a4b4449d69962a710ecb4e78bab1875c68e"
+  dependencies:
+    taskcluster-client "^5.0.0"
 
 taskcluster-lib-docs@^4.2.2:
   version "4.2.2"
