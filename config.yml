@@ -11,9 +11,6 @@ defaults:
   taskcluster:
     rootUrl:                      !env TASKCLUSTER_ROOT_URL
 
-    # BaseUrl for auth, if default built-in baseUrl isn't to be provided
-    authBaseUrl:                  'https://auth.taskcluster.net/v1'
-
     # TaskCluster credentials for this server, allowing access to the Azure table,
     # sentry, statsum, etc.
     credentials:

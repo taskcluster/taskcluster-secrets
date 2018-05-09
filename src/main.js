@@ -58,7 +58,6 @@ var load = loader({
     setup: ({cfg, Secret, validator, monitor}) => api.setup({
       rootUrl:          cfg.taskcluster.rootUrl,
       context:          {cfg, Secret},
-      authBaseUrl:      cfg.taskcluster.authBaseUrl,
       publish:          cfg.app.publishMetaData,
       baseUrl:          cfg.server.publicUrl + '/v1',
       referencePrefix:  'secrets/v1/api.json',
