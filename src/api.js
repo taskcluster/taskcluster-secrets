@@ -3,8 +3,6 @@ const slugid = require('slugid');
 const _ = require('lodash');
 const Entity = require('azure-entities');
 
-let SCHEMA_PREFIX_CONST = 'http://schemas.taskcluster.net/secrets/v1/';
-
 /** API end-point for version v1/
  *
  */
@@ -36,7 +34,7 @@ api.declare({
   method:      'put',
   route:       '/secret/:name(*)',
   name:        'set',
-  input:       SCHEMA_PREFIX_CONST + 'secret.json#',
+  input:       'secret.json#',
   scopes:      'secrets:set:<name>',
   title:       'Set Secret',
   stability:    'stable',
@@ -97,7 +95,7 @@ api.declare({
   method:      'get',
   route:       '/secret/:name(*)',
   name:        'get',
-  output:      SCHEMA_PREFIX_CONST + 'secret.json#',
+  output:      'secret.json#',
   scopes:      'secrets:get:<name>',
   title:       'Read Secret',
   stability:    'stable',
@@ -130,7 +128,7 @@ api.declare({
   method:      'get',
   route:       '/secrets',
   name:        'list',
-  output:      SCHEMA_PREFIX_CONST + 'secret-list.json#',
+  output:      'secret-list.json#',
   title:       'List Secrets',
   stability:   'stable',
   query: {

@@ -25,7 +25,8 @@ var load = loader({
   monitor: {
     requires: ['process', 'profile', 'cfg'],
     setup: ({process, profile, cfg}) => monitor({
-      project: cfg.monitoring.project || 'taskcluster-secrets',
+      rootUrl: cfg.taskcluster.rootUrl,
+      projectName: cfg.monitoring.project || 'taskcluster-secrets',
       enable: cfg.monitoring.enable,
       credentials: cfg.taskcluster.credentials,
       mock: profile !== 'production',
@@ -36,7 +37,8 @@ var load = loader({
   validator: {
     requires: ['cfg'],
     setup: ({cfg}) => validator({
-      prefix: 'secrets/v1/',
+      rootUrl: cfg.taskcluster.rootUrl,
+      serviceName: cfg.taskcluster.serviceName,
       publish: cfg.app.publishMetaData,
       aws: cfg.aws,
     }),
@@ -45,7 +47,7 @@ var load = loader({
   Secret: {
     requires: ['cfg', 'monitor', 'process'],
     setup: ({cfg, monitor, process}) => data.Secret.setup({
-      tableName:        cfg.azure.tableName,
+      tableName: cfg.azure.tableName,
       credentials: sasCredentials({
         accountId: cfg.azure.accountId,
         tableName: cfg.azure.tableName,
@@ -64,8 +66,6 @@ var load = loader({
       rootUrl:          cfg.taskcluster.rootUrl,
       context:          {cfg, Secret},
       publish:          cfg.app.publishMetaData,
-      baseUrl:          cfg.server.publicUrl + '/v1',
-      referencePrefix:  'secrets/v1/api.json',
       aws:              cfg.aws,
       monitor:          monitor.prefix('api'),
       validator,
@@ -82,7 +82,7 @@ var load = loader({
       references: [
         {
           name: 'api',
-          reference: api.reference({baseUrl: cfg.server.publicUrl + '/v1'}),
+          reference: api.reference({rootUrl: cfg.taskcluster.rootUrl}),
         },
       ],
     }),
@@ -95,21 +95,17 @@ var load = loader({
 
   server: {
     requires: ['cfg', 'router', 'docs'],
-    setup: ({cfg, router, docs}) => {
-      let secretsApp = app({
-        port:           Number(process.env.PORT || cfg.server.port),
-        env:            cfg.server.env,
-        forceSSL:       cfg.server.forceSSL,
-        trustProxy:     cfg.server.trustProxy,
-        docs,
-      });
-
-      // Mount API router
-      secretsApp.use('/v1', router);
-
-      // Create server
-      return secretsApp.createServer();
-    },
+    setup: ({cfg, router, docs}) => app({
+      port: Number(process.env.PORT || cfg.server.port),
+      env: cfg.server.env,
+      forceSSL: cfg.server.forceSSL,
+      trustProxy: cfg.server.trustProxy,
+      docs,
+      serviceName: 'secrets',
+      routers: {
+        v1: router,
+      },
+    }),
   },
 
   expire: {

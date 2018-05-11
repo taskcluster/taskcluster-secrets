@@ -19,6 +19,7 @@ exports.secrets = new Secrets({
   secrets: {
     taskcluster: [
       {env: 'TASKCLUSTER_ROOT_URL', cfg: 'taskcluster.rootUrl', name: 'rootUrl'},
+      {env: 'TASKCLUSTER_SERVICE_NAME', cfg: 'taskcluster.serviceName', name: 'serviceName'},
       {env: 'TASKCLUSTER_CLIENT_ID', cfg: 'taskcluster.credentials.clientId', name: 'clientId'},
       {env: 'TASKCLUSTER_ACCESS_TOKEN', cfg: 'taskcluster.credentials.accessToken', name: 'accessToken'},
     ],
@@ -57,8 +58,7 @@ var testClients = [
 suiteSetup(async () => {
   const auth = {};
   const cfg = await exports.load('cfg');
-  const baseUrl = cfg.server.publicUrl + '/v1';
-  const SecretsClient = taskcluster.createClient(api.reference({baseUrl}));
+  const SecretsClient = taskcluster.createClient(api.reference({rootUrl: cfg.taskcluster.rootUrl}));
 
   exports.clients = {};
   for (let client of testClients) {
