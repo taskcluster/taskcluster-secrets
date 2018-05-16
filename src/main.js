@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const Debug = require('debug');
-const api = require('../src/api');
+const builder = require('../src/api');
 const data = require('../src/data');
 const assert = require('assert');
 const path = require('path');
@@ -8,7 +8,7 @@ const _ = require('lodash');
 const loader = require('taskcluster-lib-loader');
 const validator = require('taskcluster-lib-validate');
 const monitor = require('taskcluster-lib-monitor');
-const app = require('taskcluster-lib-app');
+const App = require('taskcluster-lib-app');
 const docs = require('taskcluster-lib-docs');
 const taskcluster = require('taskcluster-client');
 const config = require('typed-env-config');
@@ -60,9 +60,9 @@ var load = loader({
     }),
   },
 
-  router: {
+  api: {
     requires: ['cfg', 'Secret', 'validator', 'monitor'],
-    setup: ({cfg, Secret, validator, monitor}) => api.setup({
+    setup: ({cfg, Secret, validator, monitor}) => builder.build({
       rootUrl:          cfg.taskcluster.rootUrl,
       context:          {cfg, Secret},
       publish:          cfg.app.publishMetaData,
@@ -73,8 +73,8 @@ var load = loader({
   },
 
   docs: {
-    requires: ['cfg', 'validator'],
-    setup: ({cfg, validator}) => docs.documenter({
+    requires: ['cfg', 'validator', 'api'],
+    setup: ({cfg, validator, api}) => docs.documenter({
       credentials: cfg.taskcluster.credentials,
       tier: 'core',
       schemas: validator.schemas,
@@ -82,7 +82,7 @@ var load = loader({
       references: [
         {
           name: 'api',
-          reference: api.reference({rootUrl: cfg.taskcluster.rootUrl}),
+          reference: api.reference(),
         },
       ],
     }),
@@ -94,17 +94,15 @@ var load = loader({
   },
 
   server: {
-    requires: ['cfg', 'router', 'docs'],
-    setup: ({cfg, router, docs}) => app({
+    requires: ['cfg', 'api', 'docs'],
+    setup: ({cfg, api, docs}) => App({
       port: Number(process.env.PORT || cfg.server.port),
       env: cfg.server.env,
       forceSSL: cfg.server.forceSSL,
       trustProxy: cfg.server.trustProxy,
       docs,
       serviceName: 'secrets',
-      routers: {
-        v1: router,
-      },
+      apis: [api],
     }),
   },
 

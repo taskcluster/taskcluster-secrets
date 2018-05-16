@@ -1,4 +1,4 @@
-const API = require('taskcluster-lib-api');
+const APIBuilder = require('taskcluster-lib-api');
 const slugid = require('slugid');
 const _ = require('lodash');
 const Entity = require('azure-entities');
@@ -6,7 +6,7 @@ const Entity = require('azure-entities');
 /** API end-point for version v1/
  *
  */
-let api = new API({
+let builder = new APIBuilder({
   title:        'TaskCluster Secrets API Documentation',
   description: [
     'The secrets service provides a simple key/value store for small bits of secret',
@@ -23,14 +23,14 @@ let api = new API({
 });
 
 // Export API
-module.exports = api;
+module.exports = builder;
 
 let cleanPayload = payload => {
   payload.secret = '(OMITTED)';
   return payload;
 };
 
-api.declare({
+builder.declare({
   method:      'put',
   route:       '/secret/:name(*)',
   name:        'set',
@@ -67,7 +67,7 @@ api.declare({
   res.reply({});
 });
 
-api.declare({
+builder.declare({
   method:      'delete',
   route:       '/secret/:name(*)',
   name:        'remove',
@@ -91,7 +91,7 @@ api.declare({
   res.reply({});
 });
 
-api.declare({
+builder.declare({
   method:      'get',
   route:       '/secret/:name(*)',
   name:        'get',
@@ -124,7 +124,7 @@ api.declare({
   }
 });
 
-api.declare({
+builder.declare({
   method:      'get',
   route:       '/secrets',
   name:        'list',
