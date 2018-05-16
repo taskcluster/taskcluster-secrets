@@ -1,5 +1,5 @@
+const _ = require('lodash');
 const assert = require('assert');
-const api = require('../src/api');
 const taskcluster = require('taskcluster-client');
 const mocha = require('mocha');
 const {fakeauth, stickyLoader, Secrets} = require('taskcluster-lib-testing');
@@ -30,45 +30,28 @@ exports.secrets = new Secrets({
 // Some clients for the tests, with differents scopes.  These are turned
 // into temporary credentials based on the main test credentials, so
 // the clientIds listed here are purely internal to the tests.
-var testClients = [
-  {
-    clientId:     'captain-write', // can write captain's secrets
-    scopes:       [
-      'secrets:set:captain:*',
-    ],
-  }, {
-    clientId:     'captain-read', // can read captain's secrets
-    accessToken:  'none',
-    scopes:       ['secrets:get:captain:*'],
-  }, {
-    clientId:     'captain-read-write',
-    scopes:       [
-      'secrets:set:captain:*',
-      'secrets:get:captain:*',
-    ],
-  }, {
-    clientId:     'captain-read-limited',
-    scopes:       [
-      'secrets:get:captain:limited/*',
-    ],
-  },
-];
+var testClients = {
+  'captain-write': ['secrets:set:captain:*'],
+  'captain-read': ['secrets:get:captain:*'],
+  'captain-read-write': ['secrets:set:captain:*', 'secrets:get:captain:*'],
+  'captain-read-limited': ['secrets:get:captain:limited/*'],
+};
+
+exports.client = async clientId => {
+  const cfg = await exports.load('cfg');
+  const api = await exports.load('api');
+  const SecretsClient = taskcluster.createClient(api.reference());
+
+  return new SecretsClient({
+    credentials: {clientId, accessToken: 'unused'},
+    rootUrl: cfg.taskcluster.rootUrl,
+  });
+};
 
 // Setup before tests
 suiteSetup(async () => {
-  const auth = {};
   const cfg = await exports.load('cfg');
-  const SecretsClient = taskcluster.createClient(api.reference({rootUrl: cfg.taskcluster.rootUrl}));
-
-  exports.clients = {};
-  for (let client of testClients) {
-    exports.clients[client.clientId] = new SecretsClient({
-      credentials: {clientId: client.clientId, accessToken: 'unused'},
-      rootUrl: cfg.taskcluster.rootUrl,
-    });
-    auth[client.clientId] = client.scopes;
-  }
-  fakeauth.start(auth, {rootUrl: cfg.taskcluster.rootUrl});
+  fakeauth.start(testClients, {rootUrl: cfg.taskcluster.rootUrl});
 });
 
 // Cleanup after tests

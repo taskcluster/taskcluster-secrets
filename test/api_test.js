@@ -69,7 +69,7 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
    * errMessage - if statusCode is set, error messages should begin with this
    */
   const makeApiCall = async ({clientName, apiCall, name, args, res, statusCode, errMessage}) => {
-    let client = helper.clients[clientName];
+    let client = await helper.client(clientName);
     let gotRes = undefined;
     try {
       if (args) {
@@ -129,7 +129,8 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('get with only "set" scope fails to read', async function() {
-    await helper.clients['captain-write'].set(SECRET_NAME, testValueFoo);
+    const client = await helper.client('captain-write');
+    await client.set(SECRET_NAME, testValueFoo);
     await makeApiCall({
       clientName: 'captain-write',
       apiCall:    'get',
@@ -139,7 +140,8 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('get with read-only scopes reads the secret', async function() {
-    await helper.clients['captain-write'].set(SECRET_NAME, testValueFoo);
+    const client = await helper.client('captain-write');
+    await client.set(SECRET_NAME, testValueFoo);
     await makeApiCall({
       clientName: 'captain-read',
       apiCall:    'get',
@@ -149,8 +151,9 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('get with read-only scopes reads an updated secret after set', async function() {
-    await helper.clients['captain-write'].set(SECRET_NAME, testValueFoo);
-    await helper.clients['captain-write'].set(SECRET_NAME, testValueBar);
+    const client = await helper.client('captain-write');
+    await client.set(SECRET_NAME, testValueFoo);
+    await client.set(SECRET_NAME, testValueBar);
     await makeApiCall({
       clientName: 'captain-read',
       apiCall:    'get',
@@ -160,7 +163,8 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('remove with read-only scopes fails', async function() {
-    await helper.clients['captain-write'].set(SECRET_NAME, testValueBar);
+    const client = await helper.client('captain-write');
+    await client.set(SECRET_NAME, testValueBar);
     await makeApiCall({
       clientName: 'captain-read',
       apiCall:    'remove',
@@ -170,7 +174,8 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('remove with write-only scopes succeeds', async function() {
-    await helper.clients['captain-write'].set(SECRET_NAME, testValueBar);
+    const client = await helper.client('captain-write');
+    await client.set(SECRET_NAME, testValueBar);
     await makeApiCall({
       clientName: 'captain-write',
       apiCall:    'remove',
@@ -201,7 +206,8 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('reading an expired secret is a 410', async function() {
-    await helper.clients['captain-write'].set(SECRET_NAME, testValueExpired);
+    const client = await helper.client('captain-write');
+    await client.set(SECRET_NAME, testValueExpired);
     await makeApiCall({
       clientName: 'captain-read',
       apiCall:    'get',
@@ -212,14 +218,14 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('Expire secrets', async () => {
-    let secrets = helper.clients['captain-read-write'];
+    let client = await helper.client('captain-read-write');
     let key = 'captain:' + slugid.v4();
 
     helper.load.save();
 
     try {
       // Create a secret
-      await secrets.set(key, {
+      await client.set(key, {
         secret: {
           message: 'keep this secret!!',
           list: ['hello', 'world'],
@@ -227,7 +233,7 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
         expires: taskcluster.fromNowJSON('2 hours'),
       });
 
-      let {secret} = await secrets.get(key);
+      let {secret} = await client.get(key);
       assert.deepEqual(secret, {
         message: 'keep this secret!!',
         list: ['hello', 'world'],
@@ -238,7 +244,7 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
       await helper.load('expire');
 
       try {
-        await secrets.get(key);
+        await client.get(key);
       } catch (err) {
         if (err.statusCode === 404) {
           return;
@@ -252,30 +258,29 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
   });
 
   test('List secrets', async () => {
-    let secrets_rw = helper.clients['captain-read-write'];
-    let secrets_limited = helper.clients['captain-read-limited'];
+    const client = await helper.client('captain-read-write');
 
     // delete any secrets we can see
-    let list = await secrets_rw.list();
+    let list = await client.list();
     for (let secret of list.secrets) {
-      await secrets_rw.remove(secret);
+      await client.remove(secret);
     }
 
     // assert the list is empty
-    list = await secrets_rw.list();
+    list = await client.list();
     assert.deepEqual(list, {secrets: []});
 
     // create some
-    await secrets_rw.set('captain:hidden/1', {
+    await client.set('captain:hidden/1', {
       secret: {sekrit: 1},
       expires: taskcluster.fromNowJSON('2 hours'),
     });
-    await secrets_rw.set('captain:limited/1', {
+    await client.set('captain:limited/1', {
       secret: {'less-sekrit': 1},
       expires: taskcluster.fromNowJSON('2 hours'),
     });
 
-    list = await secrets_rw.list();
+    list = await client.list();
     list.secrets.sort();
     assert.deepEqual(list, {secrets: ['captain:hidden/1', 'captain:limited/1']});
   });
