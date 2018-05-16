@@ -63,11 +63,12 @@ suiteSetup(async () => {
   exports.clients = {};
   for (let client of testClients) {
     exports.clients[client.clientId] = new SecretsClient({
-      credentials:      {clientId: client.clientId, accessToken: 'unused'},
+      credentials: {clientId: client.clientId, accessToken: 'unused'},
+      rootUrl: cfg.taskcluster.rootUrl,
     });
     auth[client.clientId] = client.scopes;
   }
-  fakeauth.start(auth);
+  fakeauth.start(auth, {rootUrl: cfg.taskcluster.rootUrl});
 });
 
 // Cleanup after tests
