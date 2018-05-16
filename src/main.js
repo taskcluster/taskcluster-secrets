@@ -26,7 +26,7 @@ var load = loader({
     requires: ['process', 'profile', 'cfg'],
     setup: ({process, profile, cfg}) => monitor({
       rootUrl: cfg.taskcluster.rootUrl,
-      projectName: cfg.monitoring.project || 'taskcluster-secrets',
+      projectName: 'taskcluster-sercrets',
       enable: cfg.monitoring.enable,
       credentials: cfg.taskcluster.credentials,
       mock: profile !== 'production',
@@ -38,7 +38,7 @@ var load = loader({
     requires: ['cfg'],
     setup: ({cfg}) => validator({
       rootUrl: cfg.taskcluster.rootUrl,
-      serviceName: cfg.taskcluster.serviceName,
+      serviceName: 'secrets',
       publish: cfg.app.publishMetaData,
       aws: cfg.aws,
     }),

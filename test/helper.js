@@ -19,7 +19,6 @@ exports.secrets = new Secrets({
   secrets: {
     taskcluster: [
       {env: 'TASKCLUSTER_ROOT_URL', cfg: 'taskcluster.rootUrl', name: 'rootUrl'},
-      {env: 'TASKCLUSTER_SERVICE_NAME', cfg: 'taskcluster.serviceName', name: 'serviceName'},
       {env: 'TASKCLUSTER_CLIENT_ID', cfg: 'taskcluster.credentials.clientId', name: 'clientId'},
       {env: 'TASKCLUSTER_ACCESS_TOKEN', cfg: 'taskcluster.credentials.accessToken', name: 'accessToken'},
     ],

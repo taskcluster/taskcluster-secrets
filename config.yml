@@ -10,7 +10,6 @@ defaults:
   # TaskCluster configuration
   taskcluster:
     rootUrl:                      !env TASKCLUSTER_ROOT_URL
-    serviceName:                  secrets
 
     # TaskCluster credentials for this server, allowing access to the Azure table,
     # sentry, statsum, etc.
