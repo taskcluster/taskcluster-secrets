@@ -100,7 +100,6 @@ var load = loader({
       env: cfg.server.env,
       forceSSL: cfg.server.forceSSL,
       trustProxy: cfg.server.trustProxy,
-      serviceName: 'secrets',
       apis: [api],
     }),
   },
