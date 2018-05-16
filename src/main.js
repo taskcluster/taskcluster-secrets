@@ -94,13 +94,12 @@ var load = loader({
   },
 
   server: {
-    requires: ['cfg', 'api', 'docs'],
-    setup: ({cfg, api, docs}) => App({
+    requires: ['cfg', 'api'],
+    setup: ({cfg, api}) => App({
       port: Number(process.env.PORT || cfg.server.port),
       env: cfg.server.env,
       forceSSL: cfg.server.forceSSL,
       trustProxy: cfg.server.trustProxy,
-      docs,
       serviceName: 'secrets',
       apis: [api],
     }),
