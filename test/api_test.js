@@ -1,48 +1,11 @@
 const helper = require('./helper');
 const assert = require('assert');
 const slugid = require('slugid');
-const data = require('../src/data');
 const taskcluster = require('taskcluster-client');
 
 helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping) {
-  let webServer;
-  let Secret;
-
-  suiteSetup(async function() {
-    webServer = null;
-    if (skipping()) {
-      return;
-    }
-
-    if (mock) {
-      const cfg = await helper.load('cfg');
-      helper.load.inject('Secret', data.Secret.setup({
-        tableName: 'Secret',
-        credentials: 'inMemory',
-        cryptoKey: cfg.azure.cryptoKey,
-        signingKey: cfg.azure.signingKey,
-      }));
-    }
-
-    Secret = await helper.load('Secret');
-    await Secret.ensureTable();
-    webServer = await helper.load('server');
-  });
-
-  suiteTeardown(async function() {
-    if (webServer) {
-      await webServer.terminate();
-    }
-  });
-
-  // clean out entities before each test and after the suite
-  const cleanup = async function() {
-    if (!skipping()) {
-      await Secret.remove({name: SECRET_NAME}, true);
-    }
-  };
-  setup(cleanup);
-  suiteTeardown(cleanup);
+  helper.withSecret(mock, skipping);
+  helper.withServer(mock, skipping);
 
   const SECRET_NAME = `captain:${slugid.v4()}`;
   const testValueFoo  = {
@@ -181,7 +144,7 @@ helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping
       name:        SECRET_NAME,
       res:        {},
     });
-    assert(!await Secret.load({name: SECRET_NAME}, true));
+    assert(!await helper.Secret.load({name: SECRET_NAME}, true));
   });
 
   test('getting a missing secret is a 404', async function() {

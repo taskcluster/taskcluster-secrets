@@ -69,8 +69,6 @@ production:
     trustProxy:                   true
 
 test:
-  taskcluster:
-    rootUrl: 'http://localhost:60415'
   app:
     publishMetaData: false
     statsComponent:               'test-queue'

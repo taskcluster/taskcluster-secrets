@@ -5,6 +5,7 @@ const mocha = require('mocha');
 const {fakeauth, stickyLoader, Secrets} = require('taskcluster-lib-testing');
 const load = require('../src/main');
 const config = require('typed-env-config');
+const data = require('../src/data');
 
 exports.load = stickyLoader(load);
 
@@ -25,6 +26,34 @@ exports.secrets = new Secrets({
   },
   load: exports.load,
 });
+
+/**
+ * Set helper.Secret to a fully-configured Secret entity, and inject it into the loader
+ */
+exports.withSecret = (mock, skipping) => {
+  suiteSetup(async function() {
+    if (mock) {
+      const cfg = await exports.load('cfg');
+      exports.load.inject('Secret', data.Secret.setup({
+        tableName: 'Secret',
+        credentials: 'inMemory',
+        cryptoKey: cfg.azure.cryptoKey,
+        signingKey: cfg.azure.signingKey,
+      }));
+    }
+
+    exports.Secret = await exports.load('Secret');
+    await exports.Secret.ensureTable();
+  });
+
+  const cleanup = async () => {
+    if (!skipping()) {
+      await exports.Secret.scan({}, {handler: secret => secret.remove()});
+    }
+  };
+  setup(cleanup);
+  suiteTeardown(cleanup);
+};
 
 // Some clients for the tests, with differents scopes.  These are turned
 // into temporary credentials based on the main test credentials, so
@@ -58,3 +87,35 @@ suiteTeardown(async () => {
   fakeauth.stop();
 });
 
+/**
+ * Set up an API server.  Call this after withSecret, so the server
+ * uses the same Secret class.
+ *
+ * This also sets up helper.client as an API client generator, using the
+ * "captain" clients.
+ */
+exports.withServer = (mock, skipping) => {
+  let webServer;
+
+  suiteSetup(async function() {
+    const cfg = await exports.load('cfg');
+
+    // even if we are using a "real" rootUrl for access to Azure, we use
+    // a local rootUrl to test the API, including mocking auth on that
+    // rootUrl.
+    const rootUrl = 'http://localhost:60415';
+    exports.load.cfg('taskcluster.rootUrl', rootUrl);
+    exports.load.cfg('taskcluster.clientId', null);
+    exports.load.cfg('taskcluster.accessToken', null);
+    fakeauth.start(testClients, {rootUrl});
+
+    webServer = await exports.load('server');
+  });
+
+  suiteTeardown(async function() {
+    if (webServer) {
+      await webServer.terminate();
+      webServer = null;
+    }
+  });
+};
