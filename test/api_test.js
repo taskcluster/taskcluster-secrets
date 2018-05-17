@@ -3,7 +3,6 @@ const assert = require('assert');
 const slugid = require('slugid');
 const data = require('../src/data');
 const taskcluster = require('taskcluster-client');
-const urls = require('taskcluster-lib-urls');
 
 helper.secrets.mockSuite('api_test.js', ['taskcluster'], function(mock, skipping) {
   let webServer;
