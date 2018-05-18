@@ -32,6 +32,10 @@ exports.secrets = new Secrets({
  */
 exports.withSecret = (mock, skipping) => {
   suiteSetup(async function() {
+    if (skipping()) {
+      return;
+    }
+
     if (mock) {
       const cfg = await exports.load('cfg');
       exports.load.inject('Secret', data.Secret.setup({
@@ -65,28 +69,6 @@ var testClients = {
   'captain-read-limited': ['secrets:get:captain:limited/*'],
 };
 
-exports.client = async clientId => {
-  const cfg = await exports.load('cfg');
-  const api = await exports.load('api');
-  const SecretsClient = taskcluster.createClient(api.reference());
-
-  return new SecretsClient({
-    credentials: {clientId, accessToken: 'unused'},
-    rootUrl: cfg.taskcluster.rootUrl,
-  });
-};
-
-// Setup before tests
-suiteSetup(async () => {
-  const cfg = await exports.load('cfg');
-  fakeauth.start(testClients, {rootUrl: cfg.taskcluster.rootUrl});
-});
-
-// Cleanup after tests
-suiteTeardown(async () => {
-  fakeauth.stop();
-});
-
 /**
  * Set up an API server.  Call this after withSecret, so the server
  * uses the same Secret class.
@@ -98,6 +80,9 @@ exports.withServer = (mock, skipping) => {
   let webServer;
 
   suiteSetup(async function() {
+    if (skipping()) {
+      return;
+    }
     const cfg = await exports.load('cfg');
 
     // even if we are using a "real" rootUrl for access to Azure, we use
@@ -109,13 +94,27 @@ exports.withServer = (mock, skipping) => {
     exports.load.cfg('taskcluster.accessToken', null);
     fakeauth.start(testClients, {rootUrl});
 
+    const api = await exports.load('api');
+    exports.client = async clientId => {
+      const SecretsClient = taskcluster.createClient(api.reference());
+
+      return new SecretsClient({
+        credentials: {clientId, accessToken: 'unused'},
+        rootUrl,
+      });
+    };
+
     webServer = await exports.load('server');
   });
 
   suiteTeardown(async function() {
+    if (skipping()) {
+      return;
+    }
     if (webServer) {
       await webServer.terminate();
       webServer = null;
     }
+    fakeauth.stop();
   });
 };
