@@ -95,7 +95,6 @@ exports.withServer = (mock, skipping) => {
     exports.load.cfg('taskcluster.accessToken', null);
     fakeauth.start(testClients, {rootUrl});
 
-    await exports.load('api');
     exports.client = async clientId => {
       const SecretsClient = taskcluster.createClient(builder.reference());
 
